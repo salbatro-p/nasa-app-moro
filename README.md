@@ -15,6 +15,8 @@ Open http://127.0.0.1:4173. Deployable static files are in `dist/`.
 
 WASD/arrows move; Space dashes; E scans nearby sites while held; Q emits a defensive pulse; P/Escape pauses. Touch controls appear on coarse-pointer devices. Design a launchable spacecraft, scan three sites, and return all collected data to the uplink beacon. Sound starts off. Best successful mission scores persist in browser-local storage.
 
+The compact language selector in the header supports English, Français, العربية and Türkçe. The choice persists locally, updates interface and gameplay text without restarting a run, and switches Arabic to right-to-left layout. External NASA/CSA pages remain in their original languages. Translation strings live in `dist/translations.js`; text nodes are localized in place to preserve gameplay state and event listeners.
+
 ## Implemented
 
 - Original procedural pixel-art terrain, avatar, drones and equipment; calm slate, sage and sand interface palette.
@@ -32,6 +34,7 @@ npm test
 npm run check
 # With the dev server running and Microsoft Edge installed:
 node scripts/browser-check.mjs <screenshot-output-directory>
+node scripts/language-check.mjs <screenshot-output-directory>
 ```
 
 Playwright is a development dependency only. Browser test covers launch gating, movement, all three scans, upgrade choice, successful downlink, codex, pause and narrow-screen layout.
