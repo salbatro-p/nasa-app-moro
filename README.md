@@ -57,3 +57,15 @@ Fonts: Google Fonts Pixelify Sans, DM Sans and Barlow Condensed, with local fall
 - Validation: 14 unit tests; WebGL browser tests; complete playable mission through victory; report-download validation; lab comparisons, failed mass constraints, destination switching, French/Arabic/Turkish and mobile RTL.
 
 The prototype still needs authored animation/assets, broader mission campaigns, objective-specific instrumentation, operational communication geometry, real trajectory validation, accessibility playtesting and external learning evaluation before making a strong competition-readiness claim. It does not cover every topic in the nine linked resources.
+
+## Version 0.4 — science requirements and mission evidence
+
+The player now chooses surface mapping (camera, 60 MB) or a spectral survey (spectrometer, 105 MB). An incompatible instrument fails preflight with a specific explanation. These are requirements for these teaching exercises, not a general claim that cameras cannot constrain composition or that imaging spectrometers cannot map terrain.
+
+An applied orbital experiment now persists its altitude and adds the ideal local-transfer propellant to dry mass for the launch-capacity check. The default is the existing 100 km circular orbit (no raising maneuver). It still does not model getting there from Earth, landing, capture or reserves. Surface contact windows and combat stay separate gameplay models.
+
+Successful spectral observations record authored reflectance curves. The debrief compares all three, asks the player to identify the deepest 1.5 μm dip, and explains why that alone does not identify a material. No synthetic spectrum is presented as NASA data or evidence of water. The science report includes those arrays and the interpretation context is shown in the UI.
+
+The debrief also charts actual gameplay battery and returned data, records minimum battery and measured peak demand, and exports the history and selected flight plan. Sampling is at most twice per play second plus a final sample; history is bounded to 1200 records, preserving the first record and recent data. Scores normalize science return to the chosen goal; v0.4 local records use a separate storage key because the scoring basis changed. No online rankings or education-impact claims are made.
+
+Validation: 18 unit tests; design/launch gating, four-language and mobile checks; complete camera and spectrometer browser journeys; JSON export and spectral interpretation checks. Enemy windups now show direction markers; charge poses and a temporary shield ring make combat states more legible.

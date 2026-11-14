@@ -66,3 +66,7 @@ Use mission families rather than claiming literal coverage of all NASA knowledge
 - Separate source use, software integration and reference links in the resource ledger.
 - Verify keyboard, touch, controller, reduced motion, readability and localization.
 - Conduct actual learner and action-game playtests. Do not claim equal fun or production quality to a commercial benchmark based only on implementation.
+
+## v0.4 implemented loop
+
+Science question → instrument requirement → hardware + optional orbit-raising propellant → launch gate → field observations → engineering trade-off → relay recovery → transmission → evidence chart + optional spectral interpretation → JSON report → redesign. The orbital lab retains the separate physical model assumptions while affecting the preflight mass gate. World navigation and contact scheduling remain authored gameplay.

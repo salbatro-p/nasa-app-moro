@@ -1,6 +1,8 @@
 import {translations} from './translations.js';
 import {adventureTranslations} from './adventure-translations.js';
 import {labTranslations} from './lab-translations.js';
+import {scienceTranslations} from './science-translations.js';
+translations.push(...scienceTranslations);
 translations.push(...labTranslations);
 translations.push(...adventureTranslations);
 const locales={en:'English',fr:'Français',ar:'العربية',tr:'Türkçe'};

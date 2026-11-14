@@ -1,3 +1,8 @@
+import {orbitPlan} from './orbits.js';
+export const scienceObjectives=[
+ {id:'mapping',name:'Surface mapping',instrument:'camera',question:'Where are the surface features?',requirement:'Use the survey camera to record spatial detail at three sites.',target:60},
+ {id:'composition',name:'Spectral survey',instrument:'spectrometer',question:'How does reflected light vary with wavelength?',requirement:'Use the spectrometer to compare spectra from three sites.',target:105}
+];
 export const missions=[
  {id:'moon',name:'Lunar frontier',place:'SHACKLETON / MOON',tag:'01 / FIRST LIGHT',au:1,gravity:1.62,color:'#73edd8',ground:'#18343b',objective:'Map three mineral sites and return 60 MB of measurements.',lesson:'Eclipses stop solar generation. A battery stores energy; it does not generate it.',source:'cubesat',target:60},
  {id:'mars',name:'The red silence',place:'JEZERO / MARS',tag:'02 / DUST & DISTANCE',au:1.52,gravity:3.71,color:'#ffb184',ground:'#4d2b32',objective:'Map three mineral sites and return 60 MB through dust interruptions.',lesson:'Sunlight decreases with the square of distance from the Sun. Dust can reduce it further.',source:'systems',target:60},
@@ -11,6 +16,7 @@ export const modules={
  launcher:[{id:'light',name:'Light launch',detail:'360 kg capacity · 24 credits',mass:0,cost:24,capacity:360},{id:'heavy',name:'Heavy launch',detail:'650 kg capacity · 44 credits',mass:0,cost:44,capacity:650}]
 };
 export const sources=[
+ {id:'instruments',name:'NASA / science instruments ↗',url:'https://science.nasa.gov/learn/basics-of-space-flight/chapter12-1/',use:'Use the spectrometer to compare spectra from three sites.',status:'Science reference'},
  {id:'design',name:'Design and Develop Science Missions',url:'https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf',use:'Mission objectives → requirements → design → verification. Used for the mission assembly and review loop.',status:'Design reference'},
  {id:'gmat',name:'General Mission Analysis Tool (GMAT)',url:'https://software.nasa.gov/software/GSC-19468-1',use:'Trajectory design and navigation. Future validation tool for orbital scenarios; not integrated into this prototype.',status:'Roadmap'},
  {id:'cml',name:'Concept Maturity Levels',url:'https://dataverse.jpl.nasa.gov/dataset.xhtml?persistentId=hdl:2014/44299',use:'Evidence-based concept development. Planned design-review progression; current progression is a game mechanic, not an official CML assessment.',status:'Roadmap'},
@@ -28,8 +34,10 @@ export function energyStep(wh,generationW,demandW,seconds,capacityWh){return Mat
 export function configure(selection,mission){
  const get=k=>modules[k].find(m=>m.id===selection[k])??modules[k][0];
  const power=get('power'),payload=get('payload'),comms=get('comms'),launcher=get('launcher');
- const mass=210+power.mass+payload.mass+comms.mass,cost=30+power.cost+payload.cost+comms.cost+launcher.cost;
+ const dryMass=210+power.mass+payload.mass+comms.mass,cost=30+power.cost+payload.cost+comms.cost+launcher.cost;
+ const objective=scienceObjectives.find(o=>o.id===selection.objective)??scienceObjectives[0];
+ const orbit=orbitPlan(mission.id,Number(selection.altitude??100),dryMass),mass=orbit.wetMass;
  const generation=power.id==='solar'?solarPower(power.watts,mission.au):power.watts;
  const demand=80+payload.watts+comms.watts;
- return {power,payload,comms,launcher,mass,cost,generation,demand,capacityWh:30,errors:[...(mass>launcher.capacity?['Mass exceeds launch capacity. Choose a heavier launcher or lighter hardware.']:[]),...(cost>165?['Budget exceeds 165 credits. Trade capability for affordability.']:[]) ]};
+ return {power,payload,comms,launcher,dryMass,orbit,objective,mass,cost,generation,demand,capacityWh:30,errors:[...(mass>launcher.capacity?['Mass exceeds launch capacity. Choose a heavier launcher or lighter hardware.']:[]),...(cost>165?['Budget exceeds 165 credits. Trade capability for affordability.']:[]),...(objective.instrument!==payload.id?[objective.id==='composition'?'This objective requires wavelength measurements. Select the spectrometer.':'This mapping exercise requires spatial images. Select the survey camera.']:[]) ]};
 }
