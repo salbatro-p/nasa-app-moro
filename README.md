@@ -1,10 +1,10 @@
 # ASTRA FORGE — Mission Zero
 
-An original browser-based 2.5D pixel-art mission-engineering action prototype for the NASA Space Apps **Space Mission Design Game** challenge. Fast movement, dash, defensive pulse, field upgrades and repeatable runs support learning through decisions and consequences. This is an early playable slice, not a finished Hades II-scale game or an exhaustive NASA curriculum.
+An original browser-based simulation/adventure for the NASA Space Apps **Space Mission Design Game** challenge. The world and characters are real 3D, viewed through a fixed oblique orthographic camera for 2.5D play. Pixel art belongs to the interface and typography, not the world renderer. The current chapter includes an original mission-specific story, melee combos, ranged attacks, a dodge, three enemy behaviors, a guardian encounter and consequential engineering choices. This is an early playable slice, not a finished Hades II-scale game or an exhaustive NASA curriculum.
 
 ## Run
 
-Requires Node.js 22+ (verified on 24). No runtime dependencies or build step.
+Requires Node.js 22+ (verified on 24) for the local server, and a browser with WebGL 2. Three.js 0.187.0 is vendored with its MIT license in `dist/vendor/`, so runtime JavaScript does not depend on a third-party CDN. No build step is needed.
 
 ```sh
 npm install
@@ -13,14 +13,16 @@ npm run dev
 
 Open http://127.0.0.1:4173. Deployable static files are in `dist/`.
 
-WASD/arrows move; Space dashes; E scans nearby sites while held; Q emits a defensive pulse; P/Escape pauses. Touch controls appear on coarse-pointer devices. Design a launchable spacecraft, scan three sites, and return all collected data to the uplink beacon. Sound starts off. Best successful mission scores persist in browser-local storage.
+WASD/arrows move relative to the screen; mouse aims; left click/J chains three melee strikes; right click/K fires a bolt; Space dodges; E scans while held; Q emits a defensive pulse; P/Escape pauses. J/K use assisted targeting when the mouse is not aiming. Touch controls appear on coarse-pointer devices. Design a spacecraft, follow or skip the three-part story, scan three sites, make an energy decision, select a training improvement, defeat the guardian, and transmit all collected data. Sound starts off. Best successful scores persist locally.
 
 The compact language selector in the header supports English, Français, العربية and Türkçe. The choice persists locally, updates interface and gameplay text without restarting a run, and switches Arabic to right-to-left layout. External NASA/CSA pages remain in their original languages. Translation strings live in `dist/translations.js`; text nodes are localized in place to preserve gameplay state and event listeners.
 
 ## Implemented
 
-- Original procedural pixel-art terrain, avatar, drones and equipment; calm slate, sage and sand interface palette.
-- Moon, Mars and Europa training scenarios with different solar distances.
+- Original procedural 3D terrain, rigged avatar, lighting, shadows, drones, relay and guardian; pixel-styled interface with a calm palette.
+- Moon, Mars and Europa scenarios with different solar distances and mission-specific opening stories. These share a first-chapter arena structure, not three full campaigns.
+- Continuous dodge with brief immunity, three-hit melee chain, ranged attacks, pulse, telegraphed scout/sentry/charger attacks and a two-phase guardian.
+- First-site story decision: 45 W idle demand and 50% longer scans, or 80 W idle demand and normal scan speed. The debrief explains the selected consequence.
 - Power source, payload, antenna and fictional launcher selection; mass and budget validation.
 - Ideal inverse-square solar generation and energy accounting in Wh, with explicit electrical time acceleration.
 - Scanning, data storage, downlink contact windows, hazards, defensive mechanics and a subsystem improvement choice.
@@ -37,7 +39,7 @@ node scripts/browser-check.mjs <screenshot-output-directory>
 node scripts/language-check.mjs <screenshot-output-directory>
 ```
 
-Playwright is a development dependency only. Browser test covers launch gating, movement, all three scans, upgrade choice, successful downlink, codex, pause and narrow-screen layout.
+Playwright is a development dependency only. Browser checks cover real WebGL rendering, narrative navigation, movement, attacks, dodge, all three scans, energy choice, upgrade, guardian defeat, successful downlink, codex, pause, localization and mobile layout. Unit tests cover combat geometry and mission-state progression as well as energy and launch limits. Performance and fun still need testing with actual players and lower-powered devices.
 
 ## Scientific boundaries
 
@@ -45,4 +47,4 @@ This is a fictional training environment. It does not simulate an actual crewed 
 
 The first version teaches constrained design, power versus energy, solar distance, instrument demand, data return and iterative review. It does **not** yet meet the full ambition of teaching every engineering discipline or providing a complete mission lifecycle. See `docs/GAME-DESIGN.md` for the broader plan and `docs/RESOURCES.md` for the verified resource inventory.
 
-Fonts: Google Fonts Pixelify Sans, DM Sans and Barlow Condensed, with local fallbacks. No Hades art, music, characters or code is used. NASA/CSA links are educational sources, not an endorsement.
+Fonts: Google Fonts Pixelify Sans, DM Sans and Barlow Condensed, with local fallbacks and legible Arabic typography. No Hades art, music, characters or code is used. NASA/CSA links are educational sources, not an endorsement. The opening story is original fiction, not a historical NASA event.

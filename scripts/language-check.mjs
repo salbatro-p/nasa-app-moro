@@ -18,7 +18,7 @@ await page.selectOption('#language','ar');
 const dynamic=await page.evaluate(async()=>{const {t}=await import('./i18n.js');return [t('SCANNING 37%'),t('SUNLIGHT · CONTACT OPEN · Buffer: 20 MB · pulse ready'),t('At 1 AU your selected source produced 600 W in full sunlight; peak load was 210 W. You mapped 3/3 sites and took 10 damage. Selected shield improvement after comparing constraints.'),t('At 1 AU your selected source produced 600 W in full sunlight; peak load was 210 W. You mapped 0/3 sites and took 100 damage. ')];});
 assert.match(dynamic[0],/37/);assert.match(dynamic[0],/المسح/);assert.match(dynamic[1],/الاتصال متاح/);assert.match(dynamic[2],/الحماية/);assert.ok(!dynamic[2].includes('Selected'));assert.ok(!dynamic[3].includes('At '));
 await page.screenshot({path:path.join(out,'astra-arabic.png'),fullPage:true});
-await page.locator('#launch').click();await page.clock.runFor(1000);const before=await page.locator('#clock').innerText();
+await page.locator('#launch').click();await page.locator('#story-skip').click();await page.clock.runFor(1000);const before=await page.locator('#clock').innerText();
 await page.selectOption('#language','tr');assert.equal(await page.locator('#overlay').innerText(),'');assert.equal(await page.locator('#clock').innerText(),before);await page.clock.runFor(1100);assert.notEqual(await page.locator('#clock').innerText(),before);assert.match(await page.locator('#objectives').innerText(),/Tasarım onaylandı/);
 await page.locator('#pause').click();assert.match(await page.locator('#overlay').innerText(),/Bir nefes al/);await page.selectOption('#language','fr');assert.match(await page.locator('#overlay').innerText(),/Souffle un peu/);await page.locator('#resume').click();
 await page.locator('#library').click();assert.match(await page.locator('.source').first().innerText(),/Concevoir/);await page.selectOption('#language','ar');assert.match(await page.locator('.source').first().innerText(),/تصميم المهمات/);await page.locator('#closeCodex').click();
@@ -27,3 +27,4 @@ for(const lang of ['ar','fr','tr','en']){await page.selectOption('#language',lan
 await page.selectOption('#language','ar');await page.screenshot({path:path.join(out,'astra-arabic-mobile.png')});
 await page.locator('#launch').scrollIntoViewIfNeeded();assert.equal(await page.locator('#launch').isVisible(),true);
 assert.deepEqual(errors,[]);console.log('Language checks passed: four languages, persistence, RTL, rerenders, mid-run switching without reset, pause, codex, mobile selector and overflow.');await browser.close();
+

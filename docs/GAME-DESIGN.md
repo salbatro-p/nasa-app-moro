@@ -1,8 +1,16 @@
 # Game direction and expansion plan
 
+## Corrected visual and experience direction — v0.2
+
+The user's intent is a **3D world and characters with 2.5D camera/gameplay**, combined with **pixel-art UI and writing**. Do not return to pixel-rendering the world. The initial Canvas version misunderstood this distinction and has been replaced with a WebGL/Three.js scene.
+
+The experience must combine simulation and adventure, beginning with a compelling, restrained original story. v0.2 adds three mission-specific briefings, a consequential power-mode choice, melee combos, ranged shots, continuous dodging, distinct enemy behavior and a relay guardian. The full browser chapter has been exercised through victory. This establishes a direction; it does not establish equivalence in fun, content or production quality to Hades II.
+
+Resource-driven story content is authored and traceable. CubeSat lifecycle and stored energy inform the lunar reconstruction; NASA onboard power concepts inform the Mars dust scenario; mission-design objectives and distant-solar constraints inform the Europa archive. Other listed resources retain their explicit roadmap/reference status. Never imply a linked reference is already a complete playable curriculum or integrated tool.
+
 ## Product promise
 
-Become a mission engineer by making consequential decisions in a responsive 2.5D action game. The desired feeling is fluid movement, readable threats, interesting builds and compelling retries. The game has its own space-science identity and original pixel art. UI should feel quiet, crafted and legible, with restrained color and pixel equipment motifs rather than generic neon dashboard decoration.
+Become a mission engineer by making consequential decisions in a responsive 2.5D action game. The desired feeling is fluid movement, readable threats, interesting builds and compelling retries. The game has its own space-science identity, an original 3D world and pixel-art UI. UI should feel quiet, crafted and legible, with restrained color and pixel equipment motifs rather than generic neon dashboard decoration.
 
 ## Core loop
 

@@ -1,4 +1,6 @@
 import {translations} from './translations.js';
+import {adventureTranslations} from './adventure-translations.js';
+translations.push(...adventureTranslations);
 const locales={en:'English',fr:'Français',ar:'العربية',tr:'Türkçe'};
 let language='en';
 try{const saved=localStorage.getItem('astra-language');if(Object.hasOwn(locales,saved))language=saved;}catch{}
@@ -47,7 +49,7 @@ export function initLanguages(){
  const select=document.createElement('select');select.id='language';select.setAttribute('aria-label',t('Language'));
  for(const [code,name] of Object.entries(locales)){const option=document.createElement('option');option.value=code;option.textContent=name;option.lang=code;select.append(option);}
  select.value=language;control.append(icon,select);document.querySelector('header nav').prepend(control);
- select.addEventListener('change',()=>{language=select.value;try{localStorage.setItem('astra-language',language);}catch{}refresh();select.setAttribute('aria-label',t('Language'));document.dispatchEvent(new Event('languagechange'));});
+ select.addEventListener('change',()=>{language=select.value;try{localStorage.setItem('astra-language',language);}catch{}refresh();select.setAttribute('aria-label',t('Language'));document.dispatchEvent(new Event('languagechange'));select.blur();});
  select.addEventListener('keydown',event=>event.stopPropagation());
  observer=new MutationObserver(records=>{observer.disconnect();const targets=new Set();for(const record of records){if(record.type==='childList')record.addedNodes.forEach(n=>targets.add(n));else targets.add(record.target);}for(const node of targets)if(node.isConnected)translateNode(node);observe();});
  refresh();
