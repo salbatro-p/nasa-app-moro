@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {solarPower,energyStep,configure,missions,modules,sources} from '../dist/science.js';
+test('solar power obeys inverse square, including eclipse',()=>{assert.equal(solarPower(600,2),150);assert.equal(solarPower(600,1,0),0);assert.ok(Math.abs(solarPower(600,5.2)-22.189349)<.00001);});
+test('battery accounts in Wh, saturates, and never becomes negative',()=>{assert.equal(energyStep(10,0,60,600,30),0);assert.equal(energyStep(10,120,60,600,30),20);assert.equal(energyStep(29,600,0,3600,30),30);assert.equal(energyStep(1,0,600,3600,30),0);});
+test('every destination has at least one affordable launchable sustainable build',()=>{for(const mission of missions){let found=false;for(const p of modules.power)for(const i of modules.payload)for(const c of modules.comms)for(const l of modules.launcher){const config=configure({power:p.id,payload:i.id,comms:c.id,launcher:l.id},mission);if(!config.errors.length&&config.generation>=config.demand)found=true;}assert.ok(found,mission.id);}});
+test('mass and budget prevent invalid launch configuration',()=>{const c=configure({power:'rtg',payload:'spectrometer',comms:'dish',launcher:'light'},missions[0]);assert.ok(c.errors.some(e=>e.startsWith('Mass')));const d=configure({power:'rtg',payload:'spectrometer',comms:'dish',launcher:'heavy'},missions[0]);assert.ok(d.errors.some(e=>e.startsWith('Budget')));});
+test('all nine challenge resources retained with distinct identities and explicit status',()=>{assert.equal(new Set(sources.map(s=>s.id)).size,sources.length);for(const id of ['design','gmat','cml','mdl','viz','telescope','cubesat','vr','csa'])assert.ok(sources.find(s=>s.id===id&&s.url.startsWith('https://')&&s.status));});
