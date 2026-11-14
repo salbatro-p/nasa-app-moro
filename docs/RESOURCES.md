@@ -28,3 +28,17 @@ Additional sources: [NASA Basics of Space Flight](https://science.nasa.gov/learn
 - Heat, hazard damage, dash energy, player speed and upgrades are gameplay abstractions. None should be presented as an engineering validation result.
 
 Next numerical content work requires a value-level dataset ledger with source, units, uncertainty, applicability, date, model assumptions and tests for every new spacecraft/trajectory parameter.
+
+## Orbital Laboratory (v0.3)
+
+Parameters retrieved on 2026-11-14 from [JPL satellite physical parameters](https://ssd.jpl.nasa.gov/sats/phys_par/sep.html) and [planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html):
+
+| Body | GM (km³/s²) | Mean radius (km) | Applicability |
+| --- | ---: | ---: | --- |
+| Moon | 4902.800 | 1737.4 | Spherical central body; source GM uncertainty ±0.001, radius ±0.1 km |
+| Mars | 42828.37362 | 3389.5 | Planet GM, not Mars-system GM; source GM uncertainty ±0.0008 |
+| Europa | 3202.71210 | 1560.80 | JUP365 parameters; source GM uncertainty ±0.00181, radius ±0.30 km |
+
+Uncertainties are not propagated; displayed precision is for comparing examples, not navigation. The underlying trajectory context is [NASA Basics of Space Flight, trajectories](https://science.nasa.gov/learn/basics-of-space-flight/chapter4-1/). The two-body derivation uses circular speed, Kepler period, vis-viva for two tangential burns and the ideal rocket equation. Starting altitude is 100 km; UI range 100–1200 km. Dry mass reuses the illustrative hardware configuration. Isp 220 s is an illustrative engine assumption; standard gravity is 9.80665 m/s². Only the added orbit-raising propellant is calculated. Surface launch, capture, reserves, atmosphere, plane changes and other bodies are excluded. Europa ignores Jupiter and is not a stable operational mission design. Diagram is not to scale. No claim of running GMAT or NASA Mission Viz.
+
+The standalone lab supports experimentation relevant to mission-design and GMAT learning resources. Existing nine-resource coverage statuses remain unchanged; a citation alone is not a playable lesson or software integration.

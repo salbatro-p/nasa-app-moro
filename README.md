@@ -48,3 +48,12 @@ This is a fictional training environment. It does not simulate an actual crewed 
 The first version teaches constrained design, power versus energy, solar distance, instrument demand, data return and iterative review. It does **not** yet meet the full ambition of teaching every engineering discipline or providing a complete mission lifecycle. See `docs/GAME-DESIGN.md` for the broader plan and `docs/RESOURCES.md` for the verified resource inventory.
 
 Fonts: Google Fonts Pixelify Sans, DM Sans and Barlow Condensed, with local fallbacks and legible Arabic typography. No Hades art, music, characters or code is used. NASA/CSA links are educational sources, not an endorsement. The opening story is original fiction, not a historical NASA event.
+
+## Version 0.3 — movement and orbital experiments
+
+- Locomotion uses exponential acceleration and braking; simulation advances in 120 Hz steps (catch-up capped at 100 ms after stalls). The renderer uses distance-driven strides, knee and elbow joints, directional lean, distinct alternating melee swings, dash poses and trails. Camera shake respects reduced-motion settings. Strikes, bolts and pulses buffer quick taps for 140 ms. Telemetry refreshes at 10 Hz.
+- The workshop opens a four-language Orbital Laboratory. Change altitude, retain a comparison case, inspect two-burn transfer cost and propellant, and check wet mass against the selected launcher. This separate educational experiment does not change the surface adventure; it is not GMAT integration.
+- Debrief exports a JSON mission report with loadout, result, power decision, equations, assumptions and resource links. It is a local download, not an online competition submission or leaderboard.
+- Validation: 14 unit tests; WebGL browser tests; complete playable mission through victory; report-download validation; lab comparisons, failed mass constraints, destination switching, French/Arabic/Turkish and mobile RTL.
+
+The prototype still needs authored animation/assets, broader mission campaigns, objective-specific instrumentation, operational communication geometry, real trajectory validation, accessibility playtesting and external learning evaluation before making a strong competition-readiness claim. It does not cover every topic in the nine linked resources.

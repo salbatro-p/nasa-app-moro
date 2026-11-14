@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {orbitPlan} from '../dist/orbits.js';
+test('100 km lunar circular orbit matches independent reference calculation',()=>{const p=orbitPlan('moon',100,300);assert.ok(Math.abs(p.speed-1.6335)<.001);assert.ok(p.period/60>117&&p.period/60<119);assert.equal(p.deltaV,0);assert.equal(p.propellant,0);assert.equal(p.coast,0);});
+test('raising orbit reduces speed, increases period and conserves rocket mass ratio',()=>{for(const body of ['moon','mars','europa']){const low=orbitPlan(body,100,300),high=orbitPlan(body,800,300);assert.ok(high.speed<low.speed);assert.ok(high.period>low.period);assert.ok(high.burn1>high.burn2&&high.burn2>0);assert.ok(Math.abs(220*9.80665*Math.log(high.wetMass/300)-high.deltaV)<1e-9);assert.ok(high.coast<high.period/2);}});
+test('invalid model inputs cannot produce misleading numerical results',()=>{for(const altitude of [-1,99,NaN,Infinity,2001])assert.throws(()=>orbitPlan('moon',altitude),RangeError);assert.throws(()=>orbitPlan('earth',100),RangeError);assert.throws(()=>orbitPlan('moon',100,-1),RangeError);});

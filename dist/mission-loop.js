@@ -7,12 +7,20 @@ export function tickMission(r,cfg,mission,keys,dt,hooks){
  const sx=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0),sy=(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0),movement=screenMovement(sx,sy);r.moving=!!(sx||sy);
  if(r.moving){p.dx=movement.x;p.dy=movement.y;}
  if(keys.has(' ')&&r.dash<=0){r.dash=.85;r.dashTime=.18;r.dashDirection={x:p.dx,y:p.dy};r.invuln=.22;r.wh=Math.max(0,r.wh-.18);sparks(p.x,p.y,mission.color,10);beep(230,.05);}
- if(r.dashTime>0){r.dashTime-=dt;moveWithinArena(p,r.dashDirection.x,r.dashDirection.y,dt,650);}else moveWithinArena(p,movement.x,movement.y,dt,190);
+ // Exponential response is independent of frame rate; braking is firmer than acceleration.
+ r.velocity??={x:0,y:0};const response=1-Math.exp(-(r.moving?24:32)*dt);
+ r.velocity.x+=(movement.x*190-r.velocity.x)*response;r.velocity.y+=(movement.y*190-r.velocity.y)*response;
+ const before={x:p.x,y:p.y};
+ if(r.dashTime>0){r.dashTime=Math.max(0,r.dashTime-dt);moveWithinArena(p,r.dashDirection.x,r.dashDirection.y,dt,650);}else moveWithinArena(p,r.velocity.x/190,r.velocity.y/190,dt,190);
+ r.stride=(r.stride||0)+Math.hypot(p.x-before.x,p.y-before.y)/22;
+ r.speed=Math.hypot(r.velocity.x,r.velocity.y);
+ // A quick tap during recovery survives for 140 ms, instead of disappearing in one frame.
+ r.inputBuffer??={};for(const [action,aliases] of Object.entries({strike:['j','mouse0'],bolt:['k','mouse2'],pulse:['q']}))r.inputBuffer[action]=aliases.some(k=>keys.has(k))?.14:Math.max(0,(r.inputBuffer[action]||0)-dt);
  const closest=[...r.enemies].sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];
  if(hooks.pointer?.active){const d=Math.hypot(hooks.pointer.x-p.x,hooks.pointer.y-p.y)||1;r.aim={x:(hooks.pointer.x-p.x)/d,y:(hooks.pointer.y-p.y)/d};}else if(closest){const d=Math.hypot(closest.x-p.x,closest.y-p.y)||1;r.aim={x:(closest.x-p.x)/d,y:(closest.y-p.y)/d};}else r.aim={x:p.dx,y:p.dy};
- if((keys.has('j')||keys.has('mouse0'))&&r.attackCd<=0){r.combo=r.comboWindow>0?r.combo%3+1:1;r.comboWindow=.9;r.attackCd=r.combo===3?.43:.26;r.attackAnim=.22;const hits=strike(r,r.aim,{damage:r.combo===3?4:2,range:r.combo===3?105:85,wide:r.combo===3});r.attacks++;if(hits){r.shake=.13;sparks(p.x+r.aim.x*40,p.y+r.aim.y*40,'#b8ffe1',8);}beep(300+r.combo*90,.045);}
- if((keys.has('k')||keys.has('mouse2'))&&r.special<=0&&r.heat<88){r.special=.65;r.heat+=9;r.wh=Math.max(0,r.wh-.08);r.shots.push({x:p.x,y:p.y,dx:r.aim.x*610,dy:r.aim.y*610,life:1.1,friendly:true});beep(700,.06);}
- if(keys.has('q')&&r.pulse<=0&&r.heat<90){r.pulse=3;r.heat+=13;r.wh=Math.max(0,r.wh-.15);r.rings.push({x:p.x,y:p.y,t:0});r.shots=r.shots.filter(s=>s.friendly||Math.hypot(s.x-p.x,s.y-p.y)>165);strike(r,r.aim,{damage:2,range:165,wide:true});for(const e of r.enemies)if(Math.hypot(e.x-p.x,e.y-p.y)<165)e.stun=e.type==='boss'?.1:1.3;beep(600,.12);}
+ if(r.inputBuffer.strike>0&&r.attackCd<=0){r.inputBuffer.strike=0;r.combo=r.comboWindow>0?r.combo%3+1:1;r.comboWindow=.9;r.attackCd=r.combo===3?.43:.26;r.attackAnim=.22;const hits=strike(r,r.aim,{damage:r.combo===3?4:2,range:r.combo===3?105:85,wide:r.combo===3});r.attacks++;if(hits){r.shake=.13;sparks(p.x+r.aim.x*40,p.y+r.aim.y*40,'#b8ffe1',8);}beep(300+r.combo*90,.045);}
+ if(r.inputBuffer.bolt>0&&r.special<=0&&r.heat<88){r.inputBuffer.bolt=0;r.special=.65;r.heat+=9;r.wh=Math.max(0,r.wh-.08);r.shots.push({x:p.x,y:p.y,dx:r.aim.x*610,dy:r.aim.y*610,life:1.1,friendly:true});beep(700,.06);}
+ if(r.inputBuffer.pulse>0&&r.pulse<=0&&r.heat<90){r.inputBuffer.pulse=0;r.pulse=3;r.heat+=13;r.wh=Math.max(0,r.wh-.15);r.rings.push({x:p.x,y:p.y,t:0});r.shots=r.shots.filter(s=>s.friendly||Math.hypot(s.x-p.x,s.y-p.y)>165);strike(r,r.aim,{damage:2,range:165,wide:true});for(const e of r.enemies)if(Math.hypot(e.x-p.x,e.y-p.y)<165)e.stun=e.type==='boss'?.1:1.3;beep(600,.12);}
  const cycle=r.time%34,old=r.field;r.light=cycle>23?mission.id==='mars'?.22:0:1;r.field=cycle>23?(mission.id==='mars'?'dust event':'shadow passage'):'sunlight';r.contact=(r.time%18)<12;
  if(old!==r.field)announce(r.light<1?'Reduced sunlight. Watch generation and battery.':'Sunlight restored. Your array can generate again.');r.gen=cfg.power.id==='solar'?solarPower(cfg.power.watts,mission.au,r.light):cfg.power.watts;
  let demand=r.powerMode==='conserve'?45:80,prompt='',near=r.nodes.find(n=>!n.done&&Math.hypot(n.x-p.x,n.y-p.y)<62);

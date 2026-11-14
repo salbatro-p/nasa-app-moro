@@ -25,7 +25,17 @@ export class MissionWorld {
   this.mesh(rig,'sphere','#102c3f',0,1.46,.19,.28,.21,.22);this.mesh(rig,'cube','#87f4de',0,1.48,.39,.32,.065,.035,true);
   this.mesh(rig,'cube','#e0caa4',0,1.03,.14,.51,.42,.26);this.mesh(rig,'cube','#49c6b6',0,1.07,.29,.16,.17,.04,true);
   this.mesh(rig,'cube','#1c3546',0,1.06,-.30,.43,.55,.25);this.mesh(rig,'cylinder','#8faca8',-.23,1.04,-.3,.09,.55,.09);this.mesh(rig,'cylinder','#8faca8',.23,1.04,-.3,.09,.55,.09);
-  root.userData.limbs=[];for(const side of [-1,1]){const leg=new THREE.Group();leg.position.set(side*.17,.64,0);rig.add(leg);this.mesh(leg,'cylinder','#536a70',0,-.24,0,.12,.48,.12);this.mesh(leg,'cube','#243744',0,-.46,.08,.25,.17,.40);root.userData.limbs.push(leg);const arm=new THREE.Group();arm.position.set(side*.36,1.17,0);rig.add(arm);this.mesh(arm,'sphere','#d9ceb3',0,-.08,0,.17,.22,.17);this.mesh(arm,'cylinder','#6a8587',0,-.32,.06,.10,.36,.10);root.userData.limbs.push(arm);if(side===1){const blade=this.mesh(arm,'cube','#8bffe1',.03,-.30,.70,.045,.10,1.0,true);blade.rotation.x=-.12;root.userData.blade=arm;}}
+  root.userData.legs=[];root.userData.arms=[];
+  for(const side of [-1,1]){
+   const leg=new THREE.Group();leg.position.set(side*.17,.68,0);rig.add(leg);
+   this.mesh(leg,'cylinder','#536a70',0,-.14,0,.12,.28,.12);
+   const knee=new THREE.Group();knee.position.y=-.28;leg.add(knee);this.mesh(knee,'sphere','#cad0bc',0,0,.035,.13);
+   this.mesh(knee,'cylinder','#536a70',0,-.13,0,.10,.26,.10);this.mesh(knee,'cube','#243744',0,-.26,.08,.25,.15,.40);
+   root.userData.legs.push({hip:leg,knee});
+   const arm=new THREE.Group();arm.position.set(side*.36,1.17,0);rig.add(arm);this.mesh(arm,'sphere','#d9ceb3',0,-.08,0,.17,.22,.17);
+   const elbow=new THREE.Group();elbow.position.y=-.23;arm.add(elbow);this.mesh(elbow,'cylinder','#6a8587',0,-.1,.03,.10,.26,.10);root.userData.arms.push({shoulder:arm,elbow});
+   if(side===1){const blade=this.mesh(elbow,'cube','#8bffe1',.03,-.18,.68,.045,.10,1.0,true);blade.rotation.x=-.12;root.userData.blade=arm;}
+  }
   this.ring(root,0,.045,0,.55,'#8ad6bd');return root;
  }
  rebuild(mission){this.lastMission=mission.id;this.static.clear();this.enemyModels.forEach(m=>this.actors.remove(m));this.enemyModels.clear();this.nodeModels=[];
@@ -63,15 +73,25 @@ export class MissionWorld {
  project(x,y,z=0){const p=new THREE.Vector3(x/25,z,y/25).project(this.camera),r=this.canvas.getBoundingClientRect();return{x:(p.x+1)*r.width/2,y:(1-p.y)*r.height/2};}
  resize(){const width=this.canvas.clientWidth,height=this.canvas.clientHeight;this.renderer.setSize(width,height,false);const aspect=width/height,half=aspect<.8?22/aspect:20;this.camera.left=-half*aspect;this.camera.right=half*aspect;this.camera.top=half;this.camera.bottom=-half;this.camera.updateProjectionMatrix();}
  render(run,mission,state,time,dt){if(this.lastMission!==mission.id)this.rebuild(mission);const p=run?.p||{x:0,y:165,dx:0,dy:-1};
-  this.hero.position.set(p.x/25,0,p.y/25);const angle=Math.atan2(run?.aim?.x||p.dx,run?.aim?.y||p.dy);const old=this.hero.rotation.y;this.hero.rotation.y=old+Math.atan2(Math.sin(angle-old),Math.cos(angle-old))*Math.min(1,dt*18);
-  const moving=run?.moving&&state==='play';this.hero.userData.rig.position.y=moving?Math.abs(Math.sin(time*13))*.06:Math.sin(time*2)*.025;this.hero.userData.limbs.forEach((limb,i)=>limb.rotation.x=moving?Math.sin(time*13+(i<2?0:Math.PI))*.5:0);
-  if(run?.attackAnim>0){this.hero.userData.blade.rotation.y=-1.4+run.attackAnim*9;this.hero.userData.blade.rotation.x=-.8;}else this.hero.userData.blade.rotation.y=0;
-  this.hero.visible=!(run?.invuln>0&&Math.floor(time*24)%3===0);this.hero.scale.setScalar(state==='hangar'?1.8:1.55);
-  const target=new THREE.Vector3(p.x/25*.12,0,p.y/25*.12);this.follow.lerp(target,Math.min(1,dt*4));const shake=(run?.shake||0)*.12;this.camera.position.set(27+this.follow.x+Math.sin(time*98)*shake,33,27+this.follow.z);this.camera.lookAt(this.follow.x,0,this.follow.z);this.sun.intensity=run?.light<1?1.25:3.5;
+  const active=state==='play',speed=active?(run?.speed||0)/190:0,dashing=active&&run?.dashTime>0;
+  this.hero.position.set(p.x/25,0,p.y/25);const angle=Math.atan2(run?.aim?.x??p.dx,run?.aim?.y??p.dy),old=this.hero.rotation.y;
+  this.hero.rotation.y=old+Math.atan2(Math.sin(angle-old),Math.cos(angle-old))*(1-Math.exp(-22*dt));
+  const rig=this.hero.userData.rig,phase=run?.stride||0,attack=active?(run?.attackAnim||0)/.22:0;
+  const gait=Math.sin(phase),facing=Math.atan2(p.dx,p.dy)-this.hero.rotation.y;
+  rig.position.y=dashing?.08:speed*Math.abs(gait)*.075+Math.sin(time*2)*.012;
+  rig.rotation.x=(dashing?.52:speed*.13)*Math.cos(facing);rig.rotation.z=-(dashing?.42:speed*.10)*Math.sin(facing);
+  rig.rotation.y=attack?Math.sin((1-attack)*Math.PI*2)*.35*(run.combo===2?-1:1):0;
+  this.hero.userData.legs.forEach(({hip,knee},i)=>{const wave=Math.sin(phase+i*Math.PI);hip.rotation.x=dashing?(i===0?-.8:.6):wave*.65*speed*Math.cos(facing);hip.rotation.z=-wave*.42*speed*Math.sin(facing);knee.rotation.x=dashing?.9:Math.max(0,-wave)*.9*speed;});
+  this.hero.userData.arms.forEach(({shoulder,elbow},i)=>{shoulder.rotation.set(dashing?-.7:-Math.sin(phase+i*Math.PI)*.4*speed,0,i===0?-.10:.10);elbow.rotation.x=-.35-speed*.25;});
+  if(attack){const blade=this.hero.userData.blade;blade.rotation.y=(run.combo===2?-1:1)*(-1.4+2.8*(1-attack));blade.rotation.x=-.9-Math.sin(attack*Math.PI)*.4;}
+  this.hero.visible=true;this.hero.scale.setScalar(state==='hangar'?1.8:1.65);
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const target=new THREE.Vector3(p.x/25*.17+(run?.aim?.x||0)*.35,0,p.y/25*.17+(run?.aim?.y||0)*.35);this.follow.lerp(target,1-Math.exp(-5*dt));const shake=reduced?0:(run?.shake||0)*.35;
+  this.camera.position.set(27+this.follow.x+Math.sin(time*98)*shake,33,27+this.follow.z+Math.cos(time*87)*shake);this.camera.lookAt(this.follow.x,0,this.follow.z);this.sun.intensity=run?.light<1?1.25:3.5;
   const nodes=run?.nodes||[{x:-225,y:-70},{x:205,y:-180},{x:265,y:155}];for(let i=0;i<nodes.length;i++){const model=this.nodeModels[i]||this.createNode(nodes[i],i);model.userData.core.rotation.y=time*.7;model.userData.core.position.y=nodes[i].done?.7:1.5+Math.sin(time*2+i)*.15;model.userData.core.visible=!nodes[i].done;}
   const alive=new Set();for(const enemy of run?.enemies||[]){alive.add(enemy.id);const model=this.enemyModels.get(enemy.id)||this.createEnemy(enemy);model.position.set(enemy.x/25,Math.sin(time*3+enemy.id)*.12,enemy.y/25);model.rotation.y=Math.atan2(p.x-enemy.x,p.y-enemy.y);model.userData.health.scale.x=model.userData.width*Math.max(0,enemy.hp/model.userData.baseHp);if(model.userData.halo)model.userData.halo.rotation.z=time;if(enemy.stun>0)model.rotation.z=Math.sin(time*30)*.12;else model.rotation.z=0;}
   for(const [id,model] of this.enemyModels)if(!alive.has(id)){this.actors.remove(model);this.enemyModels.delete(id);}
-  let count=0;for(const shot of run?.shots||[]){const mesh=this.effect(count++,'sphere',shot.friendly?'#9affe0':'#ff9d76');mesh.position.set(shot.x/25,.9,shot.y/25);mesh.scale.setScalar(shot.friendly?.16:.13);}
+  let count=0;if(dashing){for(let i=1;i<=5;i++){const trail=this.effect(count++,'sphere','#8bffe1');trail.position.set(p.x/25-run.dashDirection.x*i*.35,.5,p.y/25-run.dashDirection.y*i*.35);trail.scale.setScalar(.22-i*.03);}}for(const shot of run?.shots||[]){const mesh=this.effect(count++,'sphere',shot.friendly?'#9affe0':'#ff9d76');mesh.position.set(shot.x/25,.9,shot.y/25);mesh.scale.setScalar(shot.friendly?.16:.13);}
   for(const particle of run?.sparks||[]){const mesh=this.effect(count++,'sphere',particle.color);mesh.position.set(particle.x/25,Math.max(.1,particle.z/25),particle.y/25);mesh.scale.setScalar(.04+Math.max(0,particle.life)*.07);}
   for(const pulse of run?.rings||[]){const mesh=this.effect(count++,'ring','#91f6d9');mesh.position.set(pulse.x/25,.18,pulse.y/25);mesh.rotation.x=-Math.PI/2;mesh.scale.setScalar(pulse.t*13);}
   for(const telegraph of [run?.hazard,...(run?.enemies||[]).filter(e=>e.windup>0).map(e=>({x:e.x,y:e.y,t:e.windup,r:60}))].filter(Boolean)){const mesh=this.effect(count++,'ring','#ff9966');mesh.position.set(telegraph.x/25,.15,telegraph.y/25);mesh.rotation.x=-Math.PI/2;mesh.scale.setScalar((telegraph.r||75)/25);}

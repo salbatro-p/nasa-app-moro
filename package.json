@@ -1,12 +1,12 @@
 {
   "name": "astra-forge",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check dist/game.js && node --check dist/science.js && node --check dist/world3d.js && node --check dist/mission-loop.js && node --check dist/i18n.js"
+    "check": "node --check dist/game.js && node --check dist/science.js && node --check dist/world3d.js && node --check dist/mission-loop.js && node --check dist/i18n.js && node --check dist/lab.js && node --check dist/orbits.js"
   },
   "devDependencies": {
     "playwright": "^1.65.1"
