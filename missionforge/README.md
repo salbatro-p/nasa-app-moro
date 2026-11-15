@@ -2,22 +2,20 @@
 
 The submitted game for the NASA Space Apps Challenge 2026, **Space Mission Design Game** challenge. Team Atlas Tech, Sakarya local event.
 
-This folder holds a frozen, self-contained export of the game (`space-mission-design-game.html`, 3.9 MB, all assets inlined). It is recorded here after verification, before any presentation — per the project's delivery rule. The ASTRA FORGE game in `dist/` is untouched.
+This folder holds a frozen, self-contained export of the game (`space-mission-design-game.html`, 4.1 MB, all assets inlined). It is recorded here after verification, before any presentation — per the project's delivery rule. The ASTRA FORGE game in `dist/` is untouched.
 
-## This version — v13 (2026-11-15 02:39 Europe/Istanbul)
+## This version — v16 (2026-11-15 06:14 Europe/Istanbul)
 
-4-eye review fix round + ASTRA FORGE merge, in one game:
+Camera-follow fix + progression (12 disciplines, robotics endgame, Guide resources), verified with real phone-size screenshots:
 
-- **Movement, measured:** hard velocity clamp, sustained 388.1 px/s, time-to-90% 0.183 s, slide 108.6 px, stop 1.24 s, at a 120 Hz fixed timestep. Canvas aspect restored to 16/10.
-- **Tutorial preset verified GO by running calc():** $475M, dry 415 kg, wet 2,075 kg, Δv 5.05 vs 4.0 required, 130 W vs 68 W load.
-- **Destinations play differently:** Europa ice-radar + radiation zones, Mars/Opportunity dust brownouts, Bennu drifting sample canisters, Deep Space power-starved runs.
-- **Forge choices visible in the run:** laser comms → 2× DSN windows, fission → storm immunity, poly shielding → radiation zones harmless, AI avionics → aim snap with lock diamond, Heavy/Super-Heavy → 4th instrument slot.
-- **Thermal is a real system** with load-shedding; battery state of charge in Wh with 30× electrical time.
-- **Typed science:** wrong instruments fail preflight with the specific reason; spectral observations return curves, debrief asks for the deepest 1.5 µm dip and explains why that alone does not identify a material (synthetic training data, never presented as NASA data).
-- **Orbital Laboratory** on JPL constants (Moon GM 4902.800 / radius 1737.4 km; Mars 42828.37362 / 3389.5; Europa 3202.71210 / 1560.80), two-burn Hohmann, wet-mass gate into the forge. Honestly labelled not-GMAT.
-- **World:** real Three.js orthographic 3D station (vendored, no CDN) with a labelled 2D fallback; Arcane-inspired painterly art direction, original art only.
-- **Debrief:** JSON mission-report export, telemetry charts, minimum battery, peak demand. Language/sound/best score persist; 4 languages (FR/AR/EN/TR), story in English.
-- **Budgets rebalanced** to ~8% above cheapest viable builds: Moon 480, Mars 605, Bennu 445, Europa 645.
+- **Camera follow, verified:** after PLAY plus 10+ seconds of movement in several directions with dashes, the avatar stays visible and near the center of every frame, across rooms — the v15 defect (avatar leaving the frame) is fixed. First frame after PLAY: avatar centered in a wide, readable station interior.
+- **World:** wide station interior (Among Us-like rooms), walls/corridors as the world, suit lamp + emergency lamps, no black void, no giant sphere, no outdoor diorama. PULSE instrument beam (LIDAR/spectrometer) instead of FIRE; one evolving character.
+- **Progression — twelve disciplines in exact order:** the original six (Navigation, Propulsion, Power, Communications, Instruments, Structures & Thermal), then Mechanical Engineering, Materials Science, Electrical Engineering, Biology, Medicine, and finally Robotics Engineering as the gated endgame (locked until all eleven others reach Engineer L2). Each with real engineering numbers visible in the forge before committing, auditable in the debrief.
+- **Robotics endgame, verified end-to-end:** at Robotics L1+ the engineer programs robots at the fabricator; they route autonomously across the station, channel field tasks, collect samples (L2+) and bank DSN data (L3+); the debrief carries an Automation audit line.
+- **Guide:** the nine Codex Pack 01 challenge resources appear as named, sourced entries 01–09 in order, unlocking one per flight; discoveries in place (Precision Landing on the Moon, Dust-Power Management on Mars, Sample Handling on Bennu, Ice Sounding on Europa, Delay Operations in Deep Space).
+- **World grew:** Greenhouse/Biology Lab and a Robotics Bay with fabricator; station now 4200×3400.
+- **Untouched:** all v15 content (wide walled interior, suit lamp, PULSE beam, one evolving character, budgets Moon 480 / Mars 605 / Bennu 445 / Europa 645, Echo, CML, grades, FR/AR/EN/TR). Game name in this build is MISSIONFORGE; the MISSIONFORGE 54 title lands in the next edit.
+- **Verification:** independent screenshots at 390×844 (first frame + two sustained-movement frames) + zero console/page errors; all 3 inline scripts pass node --check; audit verdict pass.
 
 ## Still unverified at this version
 
@@ -25,7 +23,7 @@ No full Moon walk to the reactor and no full victory run in a real browser sessi
 
 ## How to play
 
-Open `space-mission-design-game.html` in a browser. No server needed. Touch joystick + FIRE/DASH/SCAN on phones; WASD/arrows + mouse on desktop.
+Open `space-mission-design-game.html` in a browser. No server needed. Touch joystick + PULSE/DASH/SCAN on phones; WASD/arrows + mouse on desktop.
 
 ## Sources and honesty
 
