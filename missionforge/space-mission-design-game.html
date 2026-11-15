@@ -919,6 +919,12 @@
   /* ---- cinematic beats (v17): painterly, original art, ≤5 s, tap to skip ---- */
   .cine54{ position:fixed; inset:0; z-index:70; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; background:radial-gradient(ellipse at 50% 118%, rgba(63,224,255,.10), transparent 55%), radial-gradient(ellipse at 82% -12%, rgba(177,140,255,.08), transparent 50%), #02040a; cursor:pointer; padding:1rem; }
   .cine54[hidden]{ display:none; }
+  .cine54-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; background:#000; display:none; }
+  .cine54.has-video{ background:#000; justify-content:flex-end; padding-bottom:11vh; }
+  .cine54.has-video .cine54-video{ display:block; }
+  .cine54.has-video .cine54-stage{ display:none; }
+  .cine54.has-video .cine54-box{ background:linear-gradient(180deg, transparent, rgba(0,0,0,.55) 30%, rgba(0,0,0,.72)); padding:1.2rem 1rem .4rem; width:100%; max-width:none; }
+  .cine54.has-video .cine54-tag, .cine54.has-video .cine54-title, .cine54.has-video .cine54-line{ text-shadow:0 2px 10px rgba(0,0,0,.95), 0 1px 3px rgba(0,0,0,.9); }
   /* letterbox bars — the frame reads as a film shot in any screenshot */
   .cine54-bar{ position:absolute; left:0; right:0; height:8vh; min-height:38px; background:#000; z-index:1; pointer-events:none; }
   .cine54-bar.top{ top:0; box-shadow:0 1px 0 rgba(63,224,255,.25); }
@@ -1232,6 +1238,7 @@
 </main>
 
 <div class="cine54" id="cine54" hidden role="button" aria-label="Skip cinematic">
+  <video class="cine54-video" id="cine54Video" muted playsinline preload="auto" aria-hidden="true"></video>
   <div class="cine54-bar top" aria-hidden="true"></div>
   <div class="cine54-bar bot" aria-hidden="true"></div>
   <div class="cine54-stage" aria-hidden="true">
@@ -2127,7 +2134,7 @@ $("#startBtn").addEventListener("click",e=>{
     let seen=false; try{ seen=!!localStorage.getItem("mf54_cine_intro"); }catch(_e){}
     if(seen){ go(); return; }
     try{ localStorage.setItem("mf54_cine_intro","1"); }catch(_e){}
-    showCine54({ tag:"MISSIONFORGE 54 — OPENING", title:"THE DOCKING", scene:"station",
+    showCine54({ tag:"MISSIONFORGE 54 — OPENING", title:"THE DOCKING", scene:"station", video:true,
       line:"Vera: You're a guest here, relief. This station wasn't yours — until now.", after:go });
   }catch(err){ go(); }
 });
@@ -2729,13 +2736,17 @@ function showVeraLine(text){
    The intro plays once, on the first PLAY; milestone beats play once
    per destination, at the moment of the achievement — and each beat is
    also a growth beat: the story chapter and Anfa's growth land together. */
-let cine54Timer = null, cine54Skip = null;
+let cine54Timer = null, cine54Skip = null, cine54FallbackTimer = null;
 function showCine54(o){
   const ov = $("#cine54");
   if(!ov){ if(o.after) o.after(); return; }
   /* never stack two beats: retire any live one first */
   if(cine54Skip){ ov.removeEventListener("click", cine54Skip); cine54Skip = null; }
   if(cine54Timer){ clearTimeout(cine54Timer); cine54Timer = null; }
+  if(cine54FallbackTimer){ clearTimeout(cine54FallbackTimer); cine54FallbackTimer = null; }
+  const vid = $("#cine54Video");
+  if(vid){ try{ vid.pause(); }catch(_e){} }
+  ov.classList.remove("has-video");
   $("#cine54Title").textContent = o.title || "";
   $("#cine54Line").textContent = o.line || "";
   $("#cine54Tag").textContent = o.tag || "CINEMATIC";
@@ -2745,6 +2756,24 @@ function showCine54(o){
   ov.hidden = false;
   const t0 = performance.now();
   let done = false;
+  let cine54ObjUrl = null;
+  let vidOnPlaying = null, vidOnEnded = null, vidOnError = null;
+  const cleanupVid = ()=>{
+    if(!vid) return;
+    if(vidOnPlaying) vid.removeEventListener("playing", vidOnPlaying);
+    if(vidOnEnded) vid.removeEventListener("ended", vidOnEnded);
+    if(vidOnError) vid.removeEventListener("error", vidOnError);
+    vidOnPlaying = vidOnEnded = vidOnError = null;
+  };
+  const fallbackToDrawn = ()=>{
+    if(done) return;
+    ov.classList.remove("has-video");
+    cleanupVid();
+    if(cine54ObjUrl){ try{ URL.revokeObjectURL(cine54ObjUrl); }catch(_e){} cine54ObjUrl = null; }
+    if(vid){ try{ vid.pause(); }catch(_e){} }
+    /* restart the drawn ship animation so the fallback reads as a fresh beat */
+    const sh2 = $("#cine54Ship"); if(sh2){ sh2.style.animation = "none"; void sh2.offsetWidth; sh2.style.animation = ""; }
+  };
   const finish = (force)=>{
     if(done) return;
     /* skip grace: for the first 900 ms a click is ignored, so the very
@@ -2756,13 +2785,61 @@ function showCine54(o){
     done = true;
     ov.hidden = true;
     ov.classList.remove("is-station");
+    ov.classList.remove("has-video");
+    cleanupVid();
+    if(cine54ObjUrl){ try{ URL.revokeObjectURL(cine54ObjUrl); }catch(_e){} cine54ObjUrl = null; }
+    if(vid){ try{ vid.pause(); vid.currentTime = 0; }catch(_e){} }
     if(cine54Timer){ clearTimeout(cine54Timer); cine54Timer = null; }
+    if(cine54FallbackTimer){ clearTimeout(cine54FallbackTimer); cine54FallbackTimer = null; }
     if(cine54Skip){ ov.removeEventListener("click", cine54Skip); cine54Skip = null; }
     if(o.after) o.after();
   };
   cine54Skip = ()=>finish(false);
   ov.addEventListener("click", cine54Skip);
   cine54Timer = setTimeout(()=>finish(true), 5000);
+  /* intro only: play the real AI clip full-frame inside the overlay.
+     If it fails to load or play within ~2 s, fall back to the drawn
+     station scene above (kept intact) for the remainder of the beat. */
+  if(o.video && vid){
+    let videoOk = false;
+    vidOnPlaying = ()=>{ videoOk = true; if(cine54FallbackTimer){ clearTimeout(cine54FallbackTimer); cine54FallbackTimer = null; } };
+    vidOnEnded = ()=>finish(true);
+    vidOnError = ()=>fallbackToDrawn();
+    vid.addEventListener("playing", vidOnPlaying);
+    vid.addEventListener("ended", vidOnEnded);
+    vid.addEventListener("error", vidOnError);
+    ov.classList.add("has-video");
+    cine54FallbackTimer = setTimeout(()=>{
+      if(done || videoOk) return;
+      if(vid.readyState < 2 || vid.paused || !vid.currentTime) fallbackToDrawn();
+    }, 2000);
+    /* the clip is NOT embedded in the page: it ships as a base64 text
+       asset in the repo, fetched and decoded here into a blob URL.
+       Any failure — fetch, HTTP status, decode, play() — falls back to
+       the drawn station scene for the remainder of the beat. */
+    try{
+      fetch("https://raw.githubusercontent.com/salbatro-p/nasa-app-moro/main/missionforge/cine-01-docking.mp4.b64")
+        .then(r=>{ if(!r.ok) throw new Error("cine54 fetch " + r.status); return r.text(); })
+        .then(txt=>{
+          if(done || !ov.classList.contains("has-video")) return;
+          const bin = atob(String(txt).replace(/\s+/g, ""));
+          const bytes = new Uint8Array(bin.length);
+          for(let i = 0; i < bin.length; i += 32768){
+            const end = Math.min(i + 32768, bin.length);
+            for(let j = i; j < end; j++) bytes[j] = bin.charCodeAt(j);
+          }
+          if(cine54ObjUrl){ try{ URL.revokeObjectURL(cine54ObjUrl); }catch(_e){} cine54ObjUrl = null; }
+          cine54ObjUrl = URL.createObjectURL(new Blob([bytes], { type:"video/mp4" }));
+          vid.src = cine54ObjUrl;
+          try{ vid.currentTime = 0; }catch(_e){}
+          try{
+            const p = vid.play();
+            if(p && typeof p.catch === "function") p.catch(()=>fallbackToDrawn());
+          }catch(_e){ fallbackToDrawn(); }
+        })
+        .catch(()=>fallbackToDrawn());
+    }catch(_e){ fallbackToDrawn(); }
+  }
 }
 const CINE54_PLANETS = {
   station:"radial-gradient(circle at 36% 32%, #eaf6ff, #9fc3dd 42%, #4a6f92 74%, #16283e)",
