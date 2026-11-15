@@ -2131,9 +2131,9 @@ $("#startBtn").addEventListener("click",e=>{
      Vera speaks one line. ≤5 s, tap to skip, and the moment it ends
      the joystick is live: the first movement is never delayed. */
   try{
-    let seen=false; try{ seen=!!localStorage.getItem("mf54_cine_intro"); }catch(_e){}
+    let seen=false; try{ seen=!!localStorage.getItem("mf54_cine_intro_v18"); }catch(_e){}
     if(seen){ go(); return; }
-    try{ localStorage.setItem("mf54_cine_intro","1"); }catch(_e){}
+    try{ localStorage.setItem("mf54_cine_intro_v18","1"); }catch(_e){}
     showCine54({ tag:"MISSIONFORGE 54 — OPENING", title:"THE DOCKING", scene:"station", video:true,
       line:"Vera: You're a guest here, relief. This station wasn't yours — until now.", after:go });
   }catch(err){ go(); }
