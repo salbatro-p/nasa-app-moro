@@ -2,9 +2,23 @@
 
 The submitted game for the NASA Space Apps Challenge 2026, **Space Mission Design Game** challenge. Team Atlas Tech, Sakarya local event.
 
-This folder holds a frozen, self-contained export of the game (`space-mission-design-game.html`, 5.3 MB, all assets inlined). It is recorded here after verification, before any presentation — per the project's delivery rule. The ASTRA FORGE game in `dist/` is untouched.
+This folder holds a frozen, self-contained export of the game (`space-mission-design-game.html`, 4.3 MB, all assets inlined except the runtime media). It is recorded here after verification, before any presentation — per the project's delivery rule. The ASTRA FORGE game in `dist/` is untouched. Runtime media (the intro clip and Vera's voiceover) loads from base64 text assets in this repo (`cine-01-docking.mp4.b64`, `vera-intro-01.mp3.b64`), fetched from the raw file URLs and decoded to blobs.
 
-## This version — v18 (2026-11-15 07:24 Europe/Istanbul)
+## This version — v19 (2026-11-15 09:03 Europe/Istanbul)
+
+The top-10 fixes from the multi-field professional review (game design first), plus the title repair, the full 10 s intro, the living title, Vera's voiceover, the story step, and a clear SKIP button:
+
+- **Raster art pipeline:** the world renderer now loads real raster images (MFIMG loader, `*.png.b64` text assets in this repo, fetched at runtime, vector drawing kept as fallback). Ten assets: Anfa sprite sheet (64–72 world px, 4 frames), floor + wall tiles, an 8-prop atlas, a void star tile, four destination beat stills, and the docking poster. The 10 s intro clip and Vera's voiceover are separate `.b64` text assets, same pattern. Nothing binary is pushed via the connector (binary content is rejected); the local PNG/mp3 originals are kept with the project.
+- **Title, rebuilt:** the station-bay image is the title's local base layer (slow drift under the wordmark), with a station status line (dark · crew lost · last record 09:00), the game numbers (5 destinations · 9 resources · 12 disciplines), and the destinations route to Deep Space. The same docking clip loops muted, full-bleed, behind the wordmark (poster frame first, poster as fallback). Wordmark on one line; tagline is now the challenge name, "Space Mission Design Game". The code-drawn title stickers (SVG ship, planet balls, stick astronaut) are gone.
+- **Intro, full 10 s:** the clip is the user's Gemini clip #1 at its full 10.000 s (re-encoded CRF 26 to 1,288,425 bytes so the text asset stays small; audio stripped). The beat ends when the video ends. Gate key versioned to `mf54_cine_intro_v19_10s` — a player holding only the old v19 key sees the new intro once. Boot preload + poster while loading; the drawn fallback never sets the gate.
+- **Vera's voiceover:** the intro line ("You're a guest here, relief. This station wasn't yours — until now.") plays once in sync with the video (4.56 s, `vera-intro-01.mp3.b64`), only when Sound is on, stopped the instant the intro is skipped or ends, silent on any failure.
+- **Story step:** a THE STORY button on the title, and the same scene plays on first PLAY after the docking intro and before the missions — Vera narrates the whole story from the beginning in 8 recorded lines, each line shown on screen as it is spoken, with an original WebAudio cinematic suspense score (God-of-War-style tension, composed in code, no copied track).
+- **Skip, button-only:** tap-anywhere-to-skip is gone (zero overlay click handlers, "TAP ANYWHERE" text deleted). The only skip path is a real, prominent amber SKIP ▸▸ button, always visible in every cinematic beat, disabled for the first 900 ms, with a ~400 ms fade-out on tap. A video ending naturally still advances the beat.
+- **Science fixes:** Bennu Δv corrected to 4.9 from LEO (was wrongly labelled 1.8); CML now initialises to the player's actual progress instead of a hardcoded 5 (run screens show "CML 1" for a new player).
+- **Void starfield:** the void outside the station now shows real stars (a post-vignette star pass; rooms, corridors and the suit-lamp pool stay dark). Verified by pixel check on a 390×844 run screenshot.
+- **Verification:** builder source-level verification only (gate key in both places, 10 s asset confirmed by ffprobe, voiceover `.b64` round-trip verified, all 3 inline scripts pass node --check, fade + title-loop paths reviewed). Live screenshots are still pending — the phone playtest is the real verification. Export 4,530,239 bytes. Note: the 10 s clip at its original bitrate would have made a 5.09 MB text asset (past the push cap that rejected v18's 5.34 MB embed with HTTP 413); the CRF 26 re-encode (1,717,900 chars) is the fix, with no visible loss on a phone screen.
+
+## Previous version — v18 (2026-11-15 07:24 Europe/Istanbul)
 
 The opening cinematic is now the user's real AI-generated video clip (Gemini, prompt #1 "THE DOCKING") instead of the drawn station scene:
 
@@ -38,4 +52,4 @@ Open `space-mission-design-game.html` in a browser. No server needed. Touch joys
 
 ## Sources and honesty
 
-Verified numbers kept: TCM 30 m/s, Europa $5.2B with solar allowed, Bennu Δv 1.8, Moon Δv 4.0 from LEO, Voyager signal ~10⁻¹⁶ W (transmitter 23 W; RTGs ~220 W now), DSN Goldstone/Madrid/Canberra. The 1.42 GHz signal stays deleted. ASTRA FORGE's invented masses/costs and fictional arena framing were not copied — only its verified patterns.
+Verified numbers kept: TCM 30 m/s, Europa $5.2B with solar allowed, Bennu Δv 4.9 from LEO, Moon Δv 4.0 from LEO, Voyager signal ~10⁻¹⁶ W (transmitter 23 W; RTGs ~220 W now), DSN Goldstone/Madrid/Canberra. The 1.42 GHz signal stays deleted. ASTRA FORGE's invented masses/costs and fictional arena framing were not copied — only its verified patterns.
