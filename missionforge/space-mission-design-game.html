@@ -582,7 +582,7 @@
   @media (max-width:640px){ canvas#game{ aspect-ratio:16/10; width:100%; height:auto; } }
   .overlay{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column;
-    background:rgba(3,7,16,.78); backdrop-filter:blur(4px); padding:1.2rem; text-align:center; z-index:9;
+    background:rgba(3,7,16,.78); backdrop-filter:blur(4px); padding:1.2rem; text-align:center; z-index:12;
   }
   .overlay.show{ display:flex; }
   .overlay h3{ color:#fff; font-size:1.5rem; margin:.2rem 0 .4rem; }
@@ -654,17 +654,32 @@
   .run-overlay .rs-bar.sm{ width:62px; }
   .run-overlay .rs-num{ min-width:0; white-space:nowrap; }
   .run-overlay .rs-wide{ grid-column:1 / -1; color:var(--amber); white-space:normal; }
-  /* help card — the run screen's only instruction text, behind the ? button */
+  /* help card — HOW TO FLY. v29: a compact coach strip, never a
+     modal (the v28 auto-show covered most of the stage and sat on
+     top of the pause menu). On wide stages it sits in the top
+     third, right of the telemetry column and clear of the pause /
+     help buttons; on narrow stages it is a bottom sheet with the
+     long explainer span dropped. It never covers the playfield
+     centre or the HUD column, it is pointer-transparent (only its
+     ✕ takes taps, so flight inputs pass straight through), it
+     auto-dismisses on the first movement input, and the pause
+     overlay (.overlay, z-index 12) renders above it — always. */
   .help-card{
-    position:absolute; top:3.6rem; right:.5rem; z-index:10; width:min(330px, calc(100% - 1rem));
-    background:rgba(5,11,24,.95); border:2px solid var(--cyan-dim); padding:.7rem .8rem;
-    box-shadow:5px 5px 0 rgba(0,0,0,.45); color:var(--muted);
+    position:absolute; z-index:10; left:.5rem; right:.5rem; bottom:.5rem; top:auto; width:auto;
+    background:rgba(5,11,24,.94); border:2px solid var(--cyan-dim); padding:.55rem .8rem .6rem;
+    box-shadow:5px 5px 0 rgba(0,0,0,.45); color:var(--muted); pointer-events:none;
+  }
+  @media (min-width:900px){
+    .help-card{ top:.55rem; bottom:auto; left:250px; right:118px; }
+  }
+  @media (max-width:899px){
+    .help-card .controls-help .hc-long{ display:none; }
   }
   .help-card[hidden]{ display:none; }
-  .help-card h4{ margin:0 2rem .5rem 0; font-family:"Press Start 2P",monospace; font-size:.6rem; line-height:1.7; color:var(--ink); }
-  .help-card .controls-help{ margin:0; font-size:1.02rem; }
+  .help-card h4{ margin:0 2rem .4rem 0; font-family:"Press Start 2P",monospace; font-size:.58rem; line-height:1.6; color:var(--ink); }
+  .help-card .controls-help{ margin:0; font-size:.96rem; line-height:1.32; gap:.3rem .9rem; }
   .help-card .hc-x{ position:absolute; top:.35rem; right:.35rem; width:2rem; height:2rem; background:var(--chip); color:var(--ink);
-    border:2px solid var(--line); cursor:pointer; font-size:.95rem; line-height:1; }
+    border:2px solid var(--line); cursor:pointer; font-size:.95rem; line-height:1; pointer-events:auto; }
   /* mission-data panels live BELOW the stage, behind one toggle button */
   .data-toggle{ width:100%; margin-top:.6rem; }
   .flight-panels{ margin-top:.6rem; }
@@ -1485,7 +1500,7 @@
             <span><b>WASD / ←↑↓→</b> move</span><span><b>Mouse</b> aim</span><span><b>Hold click / J</b> sensor pulse</span>
             <span><b>Space</b> dash (invulnerable)</span><span><b>P</b> pause</span>
             <span><b>Touch</b> drag the left half of the screen — the stick floats to your thumb</span><span><b>Touch</b> SCAN / DASH / PULSE buttons, bottom right</span><span><b>Touch</b> tap a hazard to target it</span>
-            <span style="color:var(--cyan);">Stand in green rings to work the station tasks. Bank science at the comms console during a DSN pass. PULSE is your instrument beam — a LIDAR / spectrometer pulse: measure a debris hazard until it resolves; point-blank, the same input works your capture arm — contact measurement and sample capture. Final burn: hold BURN / B in the ring, release in the green — the beam locks out while you burn.</span>
+            <span class="hc-long" style="color:var(--cyan);">Stand in green rings to work the station tasks. Bank science at the comms console during a DSN pass. PULSE is your instrument beam — a LIDAR / spectrometer pulse: measure a debris hazard until it resolves; point-blank, the same input works your capture arm — contact measurement and sample capture. Final burn: hold BURN / B in the ring, release in the green — the beam locks out while you burn.</span>
           </div>
         </div>
         <div class="hud-caption" id="hudCaption" hidden></div>
@@ -1691,7 +1706,7 @@ const DESTS = [
  { id:"mars", name:"Mars Sample Scout", body:"Mars", budget:605, dv:6.4, capSeg:2.3, descSeg:0.7, sun:0.43, window:0.55, hazard:1.15, rad:0.6, sciBase:110, lag:"up to 22 minutes", lagSec:1320, distAU:1.52, vinf:2.6, mu:42828, rp:3700, q:"Was Jezero Crater once habitable — and did anything ever live there?", qInst:["spec","drill"], qWhy:"Habitability is written in mineral spectra and in buried strata: the Imaging Spectrometer reads the clays and carbonates, the Drill reaches what the surface has forgotten. Photographs of a lakebed are not evidence of a lake's chemistry.",
    desc:"Land a scout rover in Jezero Crater to cache rock samples. Dust, distance and a 26-month launch window make every choice hurt.",
    teach:"Mars sunlight is 43% of Earth's and one-way radio time reaches 22 minutes — no joystick flying. Your spacecraft must be autonomous and power-frugal." },
- { id:"bennu", name:"Asteroid Sample Return", body:"Asteroid Bennu", budget:445, dv:4.9, capSeg:0.5, descSeg:0, sun:0.75, window:0.7, hazard:1.0, rad:0.45, sciBase:90, lag:"~10 minutes", lagSec:600, distAU:1.2, vinf:0.0, mu:0, rp:0, capDv:0.3, q:"What does a rubble-pile asteroid remember about the early solar system?", qInst:["drill","spec"], qWhy:"A sample-return contract is answered by material in a canister or by its spectrum: the Drill & Sample Cache brings Bennu home, the Imaging Spectrometer reads its organics in place. A magnetometer maps a field Bennu barely has.",
+ { id:"bennu", name:"Asteroid Sample Return", body:"Asteroid Bennu", budget:495, dv:4.9, capSeg:0.5, descSeg:0, sun:0.75, window:0.7, hazard:1.0, rad:0.45, sciBase:90, lag:"~10 minutes", lagSec:600, distAU:1.2, vinf:0.0, mu:0, rp:0, capDv:0.3, q:"What does a rubble-pile asteroid remember about the early solar system?", qInst:["drill","spec"], qWhy:"A sample-return contract is answered by material in a canister or by its spectrum: the Drill & Sample Cache brings Bennu home, the Imaging Spectrometer reads its organics in place. A magnetometer maps a field Bennu barely has.",
    desc:"Rendezvous with a rubble-pile asteroid, touch down, grab regolith and bring it home — the OSIRIS-REx playbook.",
    teach:"Bennu's gravity is so weak that 'landing' is really docking in slow motion. Sample instruments earn huge science per kilogram here." },
  { id:"europa", name:"Europa Ocean Explorer", body:"Europa (Jupiter)", budget:645, dv:7.4, capSeg:2.0, descSeg:1.6, sun:0.037, window:0.45, hazard:1.5, rad:1.0, sciBase:170, lag:"33–53 minutes", lagSec:2580, distAU:5.2, vinf:3.4, mu:3203, rp:2100, q:"Is there a hidden ocean under Europa's ice?", qInst:["radar","mag"], qWhy:"An ocean under ice answers two instruments: the Ice-Penetrating Radar sounds the shell, and the Magnetometer feels the ocean's induced field answering Jupiter's. That induction signature is how Galileo's magnetometer found this ocean in the first place.",
@@ -2551,7 +2566,11 @@ function refreshDesign(){
      Basic FC can only reach 99% through the two margin bonuses) */
   const relMass = c.massMargin>0.25? 3:0, relPow = c.net>35? 2:0;
   const relSum = (c.L?c.L.rel:85) + (c.A?c.A.rel:0) + relMass + relPow;
-  const relBreak = " Reliability "+c.rel+"% = "+(c.L?c.L.rel:85)+"% launcher + "+(c.A?c.A.rel:0)+"% avionics + "+relMass+"% mass margin + "+relPow+"% power margin"+(relSum>99? ", capped at 99%":"")+".";
+  /* v29 — the board's figure is relabelled a CONFIDENCE SCORE, not
+     a probability: margins add points, but no margin can make a
+     ship safer than its launcher. The number itself — and the
+     launch roll that flies on it — is unchanged. */
+  const relBreak = " Confidence score "+c.rel+"/100 = "+(c.L?c.L.rel:85)+"% launcher + "+(c.A?c.A.rel:0)+" avionics + "+relMass+" mass margin + "+relPow+" power margin"+(relSum>99? ", capped at 99":"")+" — a board score, not a probability: margin buys confidence, never more safety than the launcher itself.";
   if(blockers.length){ v.className="verdict no"; v.innerHTML = "<b>⛔ NO-GO for launch.</b><ul>"+blockers.map(b=>`<li>${b}</li>`).join("")+"</ul>"; launchBtn.disabled=true; }
   else if(sciGap){ v.className="verdict warn"; v.innerHTML = "<b>⚠ GO WITH SCIENCE GAP.</b> This design launches — but the contract question cannot be answered by this payload: the "+c.d.qInst.map(id=>byId(INSTRUMENTS,id).name).join(" or the ")+" does not fly, so the ice science is not coming home and the debrief will grade the gap. Reliability estimate "+c.rel+"% — a "+(100-c.rel)+"% launch roll can degrade one subsystem for the whole run; margin is your insurance." + relBreak + (warns.length? "<ul>"+warns.map(w=>`<li>⚠ ${w}</li>`).join("")+"</ul>" : ""); launchBtn.disabled=false; }
   else { v.className="verdict ok"; v.innerHTML = "<b>✅ GO for launch.</b> Reliability estimate "+c.rel+"% — a "+(100-c.rel)+"% launch roll can degrade one subsystem for the whole run; margin is your insurance." + relBreak + (warns.length? "<ul>"+warns.map(w=>`<li>⚠ ${w}</li>`).join("")+"</ul>" : " A clean, well-margined design."); launchBtn.disabled=false; }
@@ -2845,7 +2864,15 @@ function showStory54(after){
   };
   audio.onended = ()=>{ if(story54State===S && !S.done && !S.paused) advance(); };
   audio.onerror = ()=>{};
-  document.getElementById("story54Skip").onclick = ()=>story54Close(false);
+  /* v29 — SKIP jumps straight to the Design Lab: the close is
+     INSTANT (no fade to wait out) and the handler is bound with
+     addEventListener as well as onclick, so the button can never
+     sit inert while the story plays on behind it — the v28
+     regression the fourth review caught. story54Close is
+     idempotent (a second call finds no live story and returns),
+     so the double binding can never double-fire the handoff. */
+  const skip54Btn = document.getElementById("story54Skip");
+  if(skip54Btn){ const goSkip54 = ()=>story54Close(true); skip54Btn.onclick = goSkip54; skip54Btn.addEventListener("click", goSkip54); }
   document.getElementById("story54Next").onclick = ()=>advance();
   document.getElementById("story54Back").onclick = ()=>{
     if(S.done) return;
@@ -2862,7 +2889,7 @@ function story54Close(instant){
   const ov = document.getElementById("story54");
   const audio = document.getElementById("story54Audio");
   try{ audio.pause(); audio.removeAttribute("src"); }catch(_e){}
-  story54ScoreStop(S.score);
+  try{ story54ScoreStop(S.score); }catch(_e){}
   const finish = ()=>{
     if(ov){ ov.hidden = true; ov.classList.remove("fading"); }
     const cb = S.after; S.after = null;
@@ -2873,6 +2900,11 @@ function story54Close(instant){
   ov.classList.add("fading");
   setTimeout(finish, 460);
 }
+/* v29 — a standing SKIP binding, independent of showStory54's own
+   wiring: whenever a story is live, the button closes it instantly
+   and hands off to whatever follows (the Design Lab) */
+{ const sb54 = document.getElementById("story54Skip");
+  if(sb54) sb54.addEventListener("click", ()=>{ if(story54State) story54Close(true); }); }
 /* THE STORY button left the title in v20 — the story now plays
    inside the START FROM THE BEGINNING flow, after the intro. */
 /* HOW TO PLAY — the title-screen briefing panel, built from the same
@@ -3050,7 +3082,21 @@ $("#stepNext").addEventListener("click",()=>{ const req = STEP_REQ[curStep];
    picks in place — reproduced live, then fixed here. One tap means
    a clean board: the lab gate is cleared, the picks are set, and
    the board reprices from scratch. */
+/* v29 — RECOMMENDED is a Moon training design; loading it while an
+   Echo contract is on the board used to discard the contract with
+   no warning and no trace. Now the first click on an Echo board
+   only warns — the verdict box names the contract at stake — and a
+   second click inside the arm window loads the Moon build. */
+let recEchoArmUntil = 0;
 function applyRecBuild(){
+  const curD = DESTS.find(d=>d.id===S.dest);
+  if(curD && curD.echo && Date.now() > recEchoArmUntil){
+    recEchoArmUntil = Date.now() + 4500;
+    flashVerdict("★ RECOMMENDED BUILD is a Moon training design — loading it replaces your contract ("+curD.name+"). Click ★ RECOMMENDED again to confirm.");
+    try{ sfx(220,.12,"sine",.05); }catch(e){}
+    return;
+  }
+  recEchoArmUntil = 0;
   LAB_GATE = null;
   S.dest="moon"; S.arch="orbiter"; S.profile="full"; S.launcher="medium"; S.prop="chem"; S.frac="deep"; S.power="solS";
   S.inst=new Set(["cam","mag"]); S.comms="uhf"; S.prot="bare"; S.avio="basic"; S.traj="hohmann";
@@ -3333,6 +3379,10 @@ function fitStage(){
 }
 window.addEventListener("resize", ()=>{ if(document.body.classList.contains("on-flight")) fitStage(); });
 
+/* v29 — true while the HOW TO FLY coach strip is up because the
+   game auto-showed it (first run entry): the first movement input
+   dismisses it. A strip the player opened with ? is theirs to close. */
+let helpAutoShown = false;
 function startFlight(c){
   show("#screen-flight");
   fitStage();
@@ -3483,8 +3533,11 @@ function startFlight(c){
   showColdOpen();
   /* v28 — HOW TO FLY introduces itself on the very first run entry:
      it used to hide behind the ? button while the run opened with
-     no guidance at all. Once ever; the ? button reopens it. */
-  try{ if(!localStorage.getItem("mf54_help_seen")){ localStorage.setItem("mf54_help_seen","1"); const hc=$("#helpCard"); if(hc) hc.hidden=false; } }catch(_e){}
+     no guidance at all. Once ever; the ? button reopens it.
+     v29 — it is now the compact coach strip (see .help-card), and
+     it auto-dismisses on the player's first movement input
+     (runIntroTick watches G._moved while helpAutoShown is set). */
+  try{ if(!localStorage.getItem("mf54_help_seen")){ localStorage.setItem("mf54_help_seen","1"); const hc=$("#helpCard"); if(hc){ hc.hidden=false; helpAutoShown=true; } } }catch(_e){}
 }
 /* ================= PLAY-FIRST OPENING — caption, Vera chip, tutorial =================
    PLAY drops the player ON the station, controls live. Teaching is doing:
@@ -4265,13 +4318,14 @@ function showCine54(o){
        URL to inherit. This just drops the beat's reference. */
     cine54ObjUrl = null;
   };
-  let vidOnPlaying = null, vidOnEnded = null, vidOnError = null;
+  let vidOnPlaying = null, vidOnEnded = null, vidOnError = null, vidOnTime = null;
   const cleanupVid = ()=>{
     if(!vid) return;
     if(vidOnPlaying) vid.removeEventListener("playing", vidOnPlaying);
     if(vidOnEnded) vid.removeEventListener("ended", vidOnEnded);
     if(vidOnError) vid.removeEventListener("error", vidOnError);
-    vidOnPlaying = vidOnEnded = vidOnError = null;
+    if(vidOnTime) vid.removeEventListener("timeupdate", vidOnTime);
+    vidOnPlaying = vidOnEnded = vidOnError = vidOnTime = null;
   };
   let veraStarted = false;
   const startVeraOnce = ()=>{ if(veraStarted) return; veraStarted = true; try{ if(o.moon) playMoonVoice(); else if(o.mars) playMarsVoice(); else if(o.bennu) playBennuVoice(); else if(o.europa) playEuropaVoice(); else playVeraVoice(); }catch(_e){} if(o.intro) cineBedStart(); };
@@ -4391,35 +4445,31 @@ function showCine54(o){
      so the next PLAY retries the real clip. */
   if(o.video && vid){
     let videoOk = false;
-    vidOnPlaying = ()=>{ videoOk = true; cine54Waiting = false; if(cine54FallbackTimer){ clearTimeout(cine54FallbackTimer); cine54FallbackTimer = null; }
-      const loadEl2 = document.getElementById("cine54Loading"); if(loadEl2) loadEl2.hidden = true;
-      /* the intro gate is earned, never assumed: it is set ONLY here,
-         at the moment the intro video actually plays. Any fallback —
-         fetch, decode, play() rejection, the 2 s watchdog — leaves it
-         unset. Both versioned keys are written: the kept
-         mf54_cine_intro_v19_10s and the v20 flow's
-         mf54_cine_intro_v20. */
+    /* v29 — a beat's gate is earned by MEANINGFUL playback, never by
+       the bare 'playing' event: the v28 review caught start-then-stall
+       runs where 'playing' fired at currentTime ≈ 0.2, the gate was
+       written, and the clip then stalled into the fallback — the
+       player never saw the clip, yet it was marked "seen" forever.
+       The gate is now written by earnGate(), called only when the
+       clip has actually played past 1 s (the timeupdate listener) or
+       reached its end; the intro also earns it on a deliberate SKIP
+       (see cine54Skip). Any fallback — fetch, decode, play()
+       rejection, the stall watchdog — leaves every gate unset, so
+       the next attempt retries the real clip. Both versioned intro
+       keys are written together: the kept mf54_cine_intro_v19_10s
+       and the v20 flow's mf54_cine_intro_v20. */
+    let gateEarned = false;
+    const earnGate = ()=>{
+      if(gateEarned) return; gateEarned = true;
       if(o.intro){ try{ localStorage.setItem("mf54_cine_intro_v19_10s", "1"); localStorage.setItem("mf54_cine_intro_v20", "1"); }catch(_e){} }
-      /* v25: the Moon beat's gate is earned the same way — the
-         versioned mf54_beat_moon_v25 key is written ONLY here, at
-         the moment the Moon clip actually plays. Any fallback —
-         fetch, decode, play() rejection, the 2 s watchdog — leaves
-         it unset, so the next Moon completion retries the video. */
       if(o.moon){ try{ localStorage.setItem("mf54_beat_moon_v25", "1"); }catch(_e){} }
-      /* v27: the Mars beat's gate is earned the same way — the
-         versioned mf54_beat_mars_v27 key is written ONLY here, at
-         the moment the Mars clip actually plays (a skip after play
-         still counts as seen, because finish() never unsets it).
-         Any fallback leaves it unset, so the next Mars completion
-         retries the video. */
       if(o.mars){ try{ localStorage.setItem("mf54_beat_mars_v27", "1"); }catch(_e){} }
-      /* v28: the Bennu and Europa beats earn their gates the same way —
-         the versioned keys are written ONLY here, at the moment the
-         clip actually plays, so a beat that falls back to the drawn
-         card leaves its gate unset and the next completion retries
-         the video */
       if(o.bennu){ try{ localStorage.setItem("mf54_beat_bennu_v28", "1"); }catch(_e){} }
       if(o.europa){ try{ localStorage.setItem("mf54_beat_europa_v28", "1"); }catch(_e){} }
+    };
+    vidOnTime = ()=>{ if(vid.currentTime > 1) earnGate(); };
+    vidOnPlaying = ()=>{ videoOk = true; cine54Waiting = false; if(cine54FallbackTimer){ clearTimeout(cine54FallbackTimer); cine54FallbackTimer = null; }
+      const loadEl2 = document.getElementById("cine54Loading"); if(loadEl2) loadEl2.hidden = true;
       /* Vera speaks her line once, in sync with the clip — the
          video beats only, and only when Sound is on */
       if(o.intro || o.moon || o.mars || o.bennu || o.europa) startVeraOnce();
@@ -4430,11 +4480,12 @@ function showCine54(o){
       const remainMs = (isFinite(vid.duration) && vid.duration > 0)? (vid.duration - vid.currentTime) * 1000 + 2000 : 15000;
       cine54Timer = setTimeout(()=>finish(true), Math.max(3000, remainMs));
     };
-    vidOnEnded = ()=>finish(true);
+    vidOnEnded = ()=>{ earnGate(); finish(true); };
     vidOnError = ()=>fallbackToDrawn();
     vid.addEventListener("playing", vidOnPlaying);
     vid.addEventListener("ended", vidOnEnded);
     vid.addEventListener("error", vidOnError);
+    vid.addEventListener("timeupdate", vidOnTime);
     /* v28 — the stall watchdog no longer kills a slow start. The old
        ~2 s timer fell back (and retimed the close to ~5 s) whenever
        'playing' had not fired yet — on a slow connection the overlay
@@ -4445,13 +4496,27 @@ function showCine54(o){
        video errored, play() was rejected, the fetch failed, the clip
        sat in the element a full 12 s without reaching canplay, or 20 s passed
        with nothing at all. A playing beat closes on the clip's own
-       'ended' event, never on a timer racing it. */
+       'ended' event, never on a timer racing it.
+       v29 — the watchdog now runs on CLIP PROGRESS, not wall time:
+       every readyState increase and every advance of currentTime
+       re-arms the 12 s clock, so a clip that is still decoding
+       (readyState 1 → 2 → 3, frames landing slowly under load) is
+       never killed on the same schedule as one with no data at all.
+       Only 12 s with NO progress of any kind — or 20 s in which the
+       clip never even reached the element — falls back. */
     let vidStartStamp = 0;
+    let progStamp = performance.now(), progRS = -1, progCt = -1;
+    const noteProgress = ()=>{
+      const rs = vid.readyState, ct = vid.currentTime || 0;
+      if(rs > progRS || ct > progCt + 0.05){ progRS = rs; progCt = ct; progStamp = performance.now(); }
+    };
     const stallCheck = ()=>{
       cine54FallbackTimer = null;
       if(done || videoOk || cine54GaveUp) return;
-      if(vidStartStamp && performance.now() - vidStartStamp > 12000 && vid.readyState < 3){ fallbackToDrawn(); return; }
-      if(!vidStartStamp && performance.now() - t0 > 20000){ fallbackToDrawn(); return; }
+      noteProgress();
+      const now = performance.now();
+      if(vidStartStamp && now - progStamp > 12000 && vid.readyState < 3){ fallbackToDrawn(); return; }
+      if(!vidStartStamp && now - t0 > 20000){ fallbackToDrawn(); return; }
       cine54FallbackTimer = setTimeout(stallCheck, 1000);
     };
     cine54FallbackTimer = setTimeout(stallCheck, 2000);
@@ -4465,6 +4530,9 @@ function showCine54(o){
     const startVid = (url)=>{
       if(done || cine54GaveUp) return;
       vidStartStamp = performance.now();
+      /* a fresh clip in the element restarts the watchdog's progress
+         clock: its decode gets its own full 12 s of no-progress grace */
+      progStamp = vidStartStamp; progRS = -1; progCt = -1;
       cine54Waiting = false;
       if(cine54WaitTimer){ clearInterval(cine54WaitTimer); cine54WaitTimer = null; }
       ov.classList.remove("poster-only");
@@ -4651,6 +4719,9 @@ function runIntroTick(){
   if(G._lx === undefined){ G._lx = G.x; G._ly = G.y; G._moved = 0; }
   const d = Math.hypot(G.x - G._lx, G.y - G._ly);
   G._moved += d; G._lx = G.x; G._ly = G.y;
+  /* v29 — the auto-shown HOW TO FLY strip steps aside the moment
+     the player actually flies: first movement input dismisses it */
+  if(helpAutoShown && G._moved > 30){ helpAutoShown = false; const hc=$("#helpCard"); if(hc) hc.hidden = true; }
   if(!G.veraDone && G._moved > 130){ G.veraDone = true; showVera(0); }
   if(!G.prologue) return;
   const T = G.tut || 0;
@@ -4815,8 +4886,14 @@ let mouse = {x:W/2, y:H/2, down:false};
 let joyVec = {x:0, y:0, active:false};
 let touchFire=false;
 let burnTouch=false;
+/* v29 — the PULSE tap latch: a tap shorter than one frame (a quick
+   click, a fast thumb) used to fall entirely between input samples,
+   so the tap produced no shot and no feedback at all. Any PULSE
+   press now latches until the sim consumes it with a real shot. */
+let pulseLatch=false;
 addEventListener("keydown", e=>{
   keys[e.code]=true;
+  if(e.code==="KeyJ") pulseLatch=true;
   if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) e.preventDefault();
   if(e.code==="Space") tryDash();
   if(e.code==="KeyK") tryScan();
@@ -4829,7 +4906,7 @@ cv.addEventListener("pointermove", e=>{ const p=canvasPos(e); mouse.x=p.x; mouse
      the stick, the canvas (implicit touch capture) forwards the drag */
   if(typeof joyFloat!=="undefined" && joyFloat.on && e.pointerId===joyId) joySet(e);
 });
-cv.addEventListener("pointerdown", e=>{ const p=canvasPos(e); mouse.x=p.x; mouse.y=p.y; if(e.pointerType==="mouse") mouse.down=true;
+cv.addEventListener("pointerdown", e=>{ const p=canvasPos(e); mouse.x=p.x; mouse.y=p.y; if(e.pointerType==="mouse"){ mouse.down=true; pulseLatch=true; }
   /* v19 floating joystick: a touch landing on the LEFT half of the
      stage picks the stick up and carries it to the touch point */
   if(e.pointerType==="touch" && G && G.state==="play") floatJoyTo(e);
@@ -4904,7 +4981,7 @@ function bindBtn(id, down, up){
   el.addEventListener("pointerdown", e=>{ e.preventDefault(); el.classList.add("on"); down(); });
   ["pointerup","pointerleave","pointercancel"].forEach(ev=>el.addEventListener(ev, ()=>{ el.classList.remove("on"); if(up) up(); }));
 }
-bindBtn("#tFire", ()=>{ if(G && G.shed) addFloat(G.x,G.y-46,"PULSE OFFLINE — THERMAL SHED","#ff8f8f"); touchFire=true; }, ()=>{ touchFire=false; });
+bindBtn("#tFire", ()=>{ if(G && G.shed) addFloat(G.x,G.y-46,"PULSE OFFLINE — THERMAL SHED","#ff8f8f"); touchFire=true; pulseLatch=true; }, ()=>{ touchFire=false; });
 bindBtn("#tBurn", ()=>{ burnTouch=true; }, ()=>{ burnTouch=false; });
 bindBtn("#tDash", ()=>{ tryDash(); });
 bindBtn("#tAct", ()=>{ tryScan(); });
@@ -4916,8 +4993,8 @@ bindBtn("#tAct", ()=>{ tryScan(); });
 /* run-screen chrome: help lives behind the ? button; the HUD / clock /
    objective panels live behind the MISSION DATA toggle below the stage */
 (()=>{ const hb=$("#helpBtn"), hc=$("#helpCard"), hx=$("#helpClose");
-  if(hb&&hc) hb.addEventListener("click", ()=>{ hc.hidden=!hc.hidden; });
-  if(hx&&hc) hx.addEventListener("click", ()=>{ hc.hidden=true; });
+  if(hb&&hc) hb.addEventListener("click", ()=>{ helpAutoShown=false; hc.hidden=!hc.hidden; });
+  if(hx&&hc) hx.addEventListener("click", ()=>{ helpAutoShown=false; hc.hidden=true; });
   const dt=$("#dataToggle"), fp=$("#flightPanels");
   if(dt&&fp) dt.addEventListener("click", ()=>{ fp.hidden=!fp.hidden; dt.setAttribute("aria-expanded", String(!fp.hidden)); });
 })();
@@ -5600,10 +5677,11 @@ function update(dt){
   /* pulse — but PULSE is not the burn: while you hold inside the
      insertion ring, the same input feeds the burn and the instrument
      beam stays dark. A thermal load-shed takes the tool offline. */
-  const firing = mouse.down || keys.KeyJ || touchFire;
+  const firing = mouse.down || keys.KeyJ || touchFire || pulseLatch;
+  const fireEdge = firing && !G.fireWas; G.fireWas = firing;
   const inBurnRing = G.insert && Math.hypot(G.x-G.insert.x, G.y-G.insert.y)<G.insert.r;
   if(firing && !inBurnRing && !G.shed && G.fireT<=0 && G.energy>=2.5){
-    G.energy-=2.5; G.fireT=G.fireInterval;
+    G.energy-=2.5; G.fireT=G.fireInterval; pulseLatch=false;
     /* tracking array: from the airlock console, the pulse is a hitscan
        measurement beam at the debris cloud OUTSIDE the hull — the only
        way to resolve it */
@@ -5628,11 +5706,27 @@ function update(dt){
         sfx(300+G.meleeChain*90,.07,"square",.03);
       } else {
         G.bullets.push({x:G.x+Math.cos(G.aim)*18, y:G.y-4+Math.sin(G.aim)*18, vx:Math.cos(G.aim)*760+G.vx*0.3, vy:Math.sin(G.aim)*760+G.vy*0.3, life:.75});
+        /* v29 — EVERY shot shows itself: a brief beam + muzzle flash
+           on the instrument layer, hit or miss (the v28 empty tap
+           rendered nothing at all — no beam, no flash, no toast —
+           so the button read as dead). And a tap that finds nothing
+           downrange says so, once per press. */
+        G.pulseBeam = { x1:G.x+Math.cos(G.aim)*18, y1:G.y-4+Math.sin(G.aim)*18,
+          x2:G.x+Math.cos(G.aim)*228, y2:G.y-4+Math.sin(G.aim)*228, life:.16, max:.16 };
+        for(let i=0;i<4;i++){ const aa=G.aim+(Math.random()-0.5)*0.7; G.parts.push({x:G.x+Math.cos(G.aim)*22, y:G.y-4+Math.sin(G.aim)*22, vx:Math.cos(aa)*130, vy:Math.sin(aa)*130, life:.18, col:"#ffe9a8", size:2.6}); }
+        if(fireEdge && !(G.pulseToastT && G.t < G.pulseToastT)){
+          let anyTarget = false;
+          for(const e of G.enemies){ if(e.dead || e.outside) continue; const dd=Math.hypot(e.x-G.x, e.y-G.y); if(dd>570) continue;
+            let da=Math.atan2(e.y-G.y, e.x-G.x)-G.aim; while(da>Math.PI)da-=2*Math.PI; while(da<-Math.PI)da+=2*Math.PI;
+            if(Math.abs(da)<0.45){ anyTarget = true; break; } }
+          if(!anyTarget){ addFloat(G.x, G.y-46, "PULSE — NO TARGET IN RANGE", "#8fa3c4"); G.pulseToastT = G.t + 0.9; }
+        }
         sfx(920+Math.random()*120,.06,"square",.028,-300);
       }
     }
   }
   if(G.defBeam){ G.defBeam.life-=dt; if(G.defBeam.life<=0) G.defBeam=null; }
+  if(G.pulseBeam){ G.pulseBeam.life-=dt; if(G.pulseBeam.life<=0) G.pulseBeam=null; }
   G.energy=clamp(G.energy + G.regenEff*dt, 0, G.energyMax);
   /* combo housekeeping for HUD progress */
   const doneCount = G.tasks.filter(t=>t.done).length;
@@ -5991,7 +6085,11 @@ function solarStormEvent(){
 }
 function togglePause(){
   if(!G) return;
-  if(G.state==="play"){ G.state="pause"; showOverlay(`<h3>⏸ Paused</h3><p>Mission clock held at ${fmtTime(G.runT)}. Real flight controllers call this a hold — the physics, politely, does not care.</p>
+  if(G.state==="play"){ G.state="pause";
+    /* v29 — the coach strip never sits on the pause menu: it closes
+       as the menu opens (and the overlay out-ranks it regardless) */
+    helpAutoShown = false; const hcP=$("#helpCard"); if(hcP) hcP.hidden = true;
+    showOverlay(`<h3>⏸ Paused</h3><p>Mission clock held at ${fmtTime(G.runT)}. Real flight controllers call this a hold — the physics, politely, does not care.</p>
     <div class="boon-row" style="justify-content:center;"><button type="button" class="btn primary" id="resumeBtn">Resume</button><button type="button" class="btn" id="abortBtn">Abort mission</button><button type="button" class="btn" id="titleBtn">⌂ Return to title</button></div>`);
     $("#resumeBtn").addEventListener("click",()=>{ hideOverlay(); G.state="play"; lastTs=performance.now(); });
     $("#abortBtn").addEventListener("click",()=>{ hideOverlay(); endRun(false,true); });
@@ -6786,6 +6884,69 @@ function draw(){
       if(tp){ const rr = 16 + 5*Math.sin(G.t*5); ctx.strokeStyle = "rgba(255,210,125,.9)"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(tp.x, tp.y, rr, 0, 6.29); ctx.stroke(); }
       ctx.restore();
     } }
+  /* v29 — the PULSE beam flash, drawn in screen space so it lands
+     on BOTH render paths (the beam lives for ~0.16 s: a bright core
+     inside a soft halo, fading out) */
+  if(G.pulseBeam){ const pb=G.pulseBeam, pa=clamp(pb.life/(pb.max||0.16),0,1);
+    const q1 = W3? MF3D.project(pb.x1, pb.y1, 30) : { x:pb.x1-camX, y:pb.y1-camY };
+    const q2 = W3? MF3D.project(pb.x2, pb.y2, 30) : { x:pb.x2-camX, y:pb.y2-camY };
+    if(q1 && q2){ ctx.save(); ctx.globalAlpha = pa;
+      ctx.strokeStyle="rgba(255,170,60,.45)"; ctx.lineWidth=8; ctx.beginPath(); ctx.moveTo(q1.x,q1.y); ctx.lineTo(q2.x,q2.y); ctx.stroke();
+      ctx.strokeStyle="rgba(255,240,200,.95)"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(q1.x,q1.y); ctx.lineTo(q2.x,q2.y); ctx.stroke();
+      ctx.restore(); } }
+  /* v29 — FIRST-30-SECONDS COACH LAYER: the run used to say WHAT
+     (RESTORE REACTOR POWER) but never WHERE. While the reactor task
+     stands and the run is young, the layer paints a ring highlight
+     on the reactor ring itself, a labelled arrow pointing the way
+     whenever the reactor is off-screen, and one line of instruction.
+     The moment the player has really moved (the same distance that
+     advances the tutorial), the whole layer dismisses itself. */
+  if(G.state==="play" && !G.coachDone && G.runT < 30){
+    if(G._moved > 150) G.coachDone = true;
+    else {
+      const rt = (G.tasks||[]).find(t=>t.id==="power");
+      if(rt && !rt.done){
+        const pp = W3? MF3D.project(G.x, G.y, 10) : { x:G.x-camX, y:G.y-camY };
+        let tp3 = W3? MF3D.project(rt.x, rt.y, 10) : { x:rt.x-camX, y:rt.y-camY };
+        if(!tp3 && pp) tp3 = { x: pp.x + Math.sign(rt.x-G.x)*140, y: pp.y + Math.sign(rt.y-G.y)*100 };
+        if(tp3){
+          const onScr = tp3.x > 30 && tp3.x < W-30 && tp3.y > 30 && tp3.y < H-30;
+          ctx.save();
+          if(onScr){
+            /* ring highlight on the first task + its name */
+            const rr2 = 34 + 6*Math.sin(G.t*5);
+            ctx.strokeStyle = "rgba(255,180,84,.95)"; ctx.lineWidth = 3.5;
+            ctx.beginPath(); ctx.arc(tp3.x, tp3.y, rr2, 0, 6.29); ctx.stroke();
+            ctx.strokeStyle = "rgba(255,180,84,.45)"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(tp3.x, tp3.y, rr2 + 9, 0, 6.29); ctx.stroke();
+            ctx.fillStyle = "#ffd9a0"; ctx.font = "15px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+            ctx.fillText("⚛ REACTOR", tp3.x, tp3.y - rr2 - 14);
+          } else if(pp){
+            /* labelled waypoint arrow, clamped to the stage edge */
+            const ang = Math.atan2(tp3.y - pp.y, tp3.x - pp.x);
+            const ax = clamp(tp3.x, 52, W-52), ay = clamp(tp3.y, 96, H-84);
+            ctx.translate(ax, ay); ctx.rotate(ang);
+            ctx.fillStyle = "#ffb454";
+            ctx.beginPath(); ctx.moveTo(16,0); ctx.lineTo(-10,-10); ctx.lineTo(-4,0); ctx.lineTo(-10,10); ctx.closePath(); ctx.fill();
+            ctx.rotate(-ang);
+            ctx.fillStyle = "#ffd9a0"; ctx.font = "13px 'Press Start 2P', monospace"; ctx.textAlign = "center";
+            ctx.fillText("⚛ REACTOR", 0, -20);
+          }
+          ctx.restore();
+          /* the one line — a chip at the bottom centre, clear of the
+             combo readout and the touch cluster */
+          ctx.save();
+          ctx.font = "18px 'VT323', monospace"; ctx.textAlign = "center";
+          const line = "PULSE near the sparking panel";
+          const lw = ctx.measureText(line).width + 26;
+          ctx.fillStyle = "rgba(3,34,46,.88)"; ctx.fillRect(W/2 - lw/2, H - 58, lw, 26);
+          ctx.strokeStyle = "rgba(63,224,255,.8)"; ctx.lineWidth = 1.5; ctx.strokeRect(W/2 - lw/2, H - 58, lw, 26);
+          ctx.fillStyle = "#dff8ff"; ctx.fillText(line, W/2, H - 40);
+          ctx.restore();
+        }
+      }
+    }
+  }
   /* cinematic letterbox at story beats */
   if(G.state==="cine"||G.state==="story"){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,54); ctx.fillRect(0,H-54,W,54); ctx.fillStyle="rgba(232,238,251,.65)"; ctx.font="12px 'Press Start 2P', monospace"; ctx.textAlign="center"; ctx.fillText("— CINEMATIC —", W/2, 34); ctx.textAlign="left"; }
   ctx.restore();
